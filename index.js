@@ -1,11 +1,12 @@
 // Sacamos las funciones que ocupamos de las librerías globales
 const { useState, useEffect } = React;
 
-// CONFIGURA TU SUPABASE AQUÍ
-const _supabase = supabase.createClient(
-  'TU_URL_DE_SUPABASE', 
-  'TU_API_KEY_ANONIMA'
-);
+// CONFIGURACIÓN DE SUPABASE (Extraída de tu .env.local)
+const SUPABASE_URL = 'https://hvnpkljyooqcdzwdptgt.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc2MiOiJmcm9tLWJlbG93LXByb2R1Y3RzLSI1InJlZ3I1I2Imh2bnBkljyooqcdzwdptgt.eyJpZCI6Imh2bnBkljyooqcdzwdptgtLCJpYXQiOjE3M2E2MTM2MjA1MjE4LCJleHAiOjIxNDI3MTA1MjE4fQ.-pq3iVzqjsJCyGNXkFP1HSIQEBTtr7i7ptsY6FYjJZ0';
+
+// Inicializamos el cliente
+const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 function App() {
   const [productos, setProductos] = useState([]);
@@ -21,14 +22,23 @@ function App() {
   async function fetchProductos() {
     setCargando(true);
     try {
-      let query = _supabase.from('productos').select('*').eq('disponible', true);
-      if (categoria !== 'Todos') query = query.eq('categoria', categoria);
+      // Intento de conexión a tu tabla 'productos'
+      let query = _supabase
+        .from('productos')
+        .select('*')
+        .eq('disponible', true);
+
+      if (categoria !== 'Todos') {
+        query = query.eq('categoria', categoria);
+      }
       
       const { data, error } = await query.order('created_at', { ascending: false });
+      
       if (error) throw error;
       setProductos(data || []);
+      
     } catch (err) {
-      console.error("Error:", err.message);
+      console.error("Error al conectar con Supabase:", err.message);
     } finally {
       setCargando(false);
     }
@@ -64,22 +74,28 @@ function App() {
           <div className="loader">Buscando en el archivo...</div>
         ) : (
           <div className="product-grid">
-            {productos.map((p, index) => (
-              <article 
-                key={p.id} 
-                className="product-card" 
-                style={{ marginTop: index % 2 !== 0 ? '60px' : '0' }}
-              >
-                <div className="image-wrapper">
-                  <img src={p.imagen_url} alt={p.nombre} />
-                  <span className="card-badge">{p.categoria}</span>
-                </div>
-                <div className="card-info">
-                  <h3>{p.nombre}</h3>
-                  <p className="price">₡{p.precio.toLocaleString()}</p>
-                </div>
-              </article>
-            ))}
+            {productos.length === 0 ? (
+              <p style={{ gridColumn: '1/-1', textAlign: 'center', opacity: 0.5 }}>
+                No hay piezas disponibles en esta categoría por ahora.
+              </p>
+            ) : (
+              productos.map((p, index) => (
+                <article 
+                  key={p.id} 
+                  className="product-card" 
+                  style={{ marginTop: index % 2 !== 0 ? '60px' : '0' }}
+                >
+                  <div className="image-wrapper">
+                    <img src={p.imagen_url} alt={p.nombre} />
+                    <span className="card-badge">{p.categoria}</span>
+                  </div>
+                  <div className="card-info">
+                    <h3>{p.nombre}</h3>
+                    <p className="price">₡{p.precio ? p.precio.toLocaleString() : '0'}</p>
+                  </div>
+                </article>
+              ))
+            )}
           </div>
         )}
       </main>
@@ -87,6 +103,6 @@ function App() {
   );
 }
 
-// Renderizado final para navegador
+// Renderizado final para navegador usando ReactDOM global
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(<App />);
