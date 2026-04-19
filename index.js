@@ -24,7 +24,7 @@ function App() {
   }
 
   return (
-    <>
+    <
       <nav className="nav-container">
         <div className="logo">DORIS.</div>
         <div className="nav-menu">
