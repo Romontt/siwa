@@ -32,9 +32,9 @@ export default function LandingPage() {
   return (
     <div style={styles.pageWrapper}>
       
-      {/* --- NAVBAR EXCLUSIVO --- */}
+      {/* --- NAV MINIMALISTA --- */}
       <nav style={styles.nav}>
-        <div style={styles.logo}>LA AMERICANA DE DORIS</div>
+        <div style={styles.logo}>DORIS.</div>
         <div style={styles.menu}>
           {categorias.map(cat => (
             <button 
@@ -42,8 +42,8 @@ export default function LandingPage() {
               onClick={() => setCategoriaActual(cat)}
               style={{
                 ...styles.navButton,
-                opacity: categoriaActual === cat ? 1 : 0.5,
-                fontWeight: categoriaActual === cat ? '600' : '300'
+                opacity: categoriaActual === cat ? 1 : 0.4,
+                borderBottom: categoriaActual === cat ? '1px solid #1a1a1a' : 'none'
               }}
             >
               {cat}
@@ -54,34 +54,41 @@ export default function LandingPage() {
 
       {/* --- HERO EDITORIAL --- */}
       <header style={styles.hero}>
-        <span style={styles.heroLabel}>Colección 2026</span>
-        <h1 style={styles.heroTitle}>Tesoros con Historia</h1>
-        <p style={styles.heroSubtitle}>Curaduría de ropa americana seleccionada pieza por pieza.</p>
+        <div style={styles.heroContent}>
+          <span style={styles.heroLabel}>Edición Limitada</span>
+          <h1 style={styles.heroTitle}>The Heritage <br/><i>Collection</i></h1>
+          <p style={styles.heroSubtitle}>Curaduría de ropa americana con alma y pasado.</p>
+        </div>
       </header>
 
       {/* --- CONTENIDO PRINCIPAL --- */}
       <main style={styles.main}>
         <div style={styles.sectionHeader}>
-          <h2 style={styles.categoryTitle}>
-            {categoriaActual === 'Todos' ? 'Novedades' : categoriaActual}
-          </h2>
-          <div style={styles.divider}></div>
+          <h2 style={styles.categoryTitle}>{categoriaActual}</h2>
+          <p style={styles.countText}>{productos.length} piezas seleccionadas</p>
         </div>
 
         {cargando ? (
-          <div style={styles.loadingContainer}>
-            <p>Explorando el archivo...</p>
-          </div>
+          <p style={styles.loading}>Explorando archivo...</p>
         ) : (
           <div style={styles.grid}>
-            {productos.map(prod => (
-              <div key={prod.id} style={styles.card}>
+            {productos.map((prod, index) => (
+              <div 
+                key={prod.id} 
+                style={{
+                  ...styles.card,
+                  marginTop: index % 2 !== 0 ? '80px' : '0px' // ESTO CREA EL EFECTO ASIMÉTRICO
+                }}
+              >
                 <div style={styles.imageWrapper}>
                   <img src={prod.imagen_url} alt={prod.nombre} style={styles.image} />
                 </div>
                 <div style={styles.cardInfo}>
                   <h3 style={styles.prodName}>{prod.nombre}</h3>
-                  <p style={styles.price}>₡{prod.precio.toLocaleString()}</p>
+                  <div style={styles.priceContainer}>
+                    <span style={styles.price}>₡{prod.precio.toLocaleString()}</span>
+                    <button style={styles.minimalAdd}>+</button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -89,10 +96,8 @@ export default function LandingPage() {
         )}
       </main>
 
-      {/* --- FOOTER --- */}
       <footer style={styles.footer}>
         <p style={styles.footerText}>GUÁPILES • COSTA RICA</p>
-        <p style={styles.footerSub}>Piezas únicas con propósito.</p>
       </footer>
     </div>
   );
@@ -100,145 +105,159 @@ export default function LandingPage() {
 
 const styles = {
   pageWrapper: {
-    backgroundColor: '#ffffff', // Blanco puro para exclusividad
+    backgroundColor: '#ffffff',
     minHeight: '100vh',
-    fontFamily: '"Montserrat", sans-serif',
-    color: '#000'
+    color: '#1a1a1a',
+    fontFamily: '"Montserrat", sans-serif'
   },
   nav: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
     padding: '40px 20px',
-    textAlign: 'center',
     backgroundColor: '#fff',
-    borderBottom: '1px solid #f2f2f2',
     position: 'sticky',
     top: 0,
     zIndex: 100
   },
   logo: {
-    fontSize: '1.8rem',
-    fontWeight: '700',
-    letterSpacing: '4px',
-    marginBottom: '20px',
+    fontSize: '2rem',
+    fontWeight: '400',
+    letterSpacing: '8px',
+    marginBottom: '30px',
     fontFamily: '"Playfair Display", serif'
   },
   menu: {
     display: 'flex',
-    gap: '30px',
-    justifyContent: 'center',
-    textTransform: 'uppercase'
+    gap: '40px',
+    justifyContent: 'center'
   },
   navButton: {
     background: 'none',
     border: 'none',
     cursor: 'pointer',
-    fontSize: '0.7rem',
-    letterSpacing: '2px',
-    transition: '0.3s'
+    fontSize: '0.65rem',
+    textTransform: 'uppercase',
+    letterSpacing: '3px',
+    padding: '10px 0',
+    transition: '0.4s'
   },
   hero: {
-    padding: '120px 20px',
+    padding: '100px 20px',
     textAlign: 'center',
-    backgroundColor: '#fff'
+    maxWidth: '900px',
+    margin: '0 auto'
   },
   heroLabel: {
     fontSize: '0.7rem',
-    letterSpacing: '5px',
     textTransform: 'uppercase',
+    letterSpacing: '5px',
     color: '#d46a4e',
-    display: 'block',
-    marginBottom: '15px'
+    marginBottom: '20px',
+    display: 'block'
   },
   heroTitle: {
-    fontSize: '4rem',
+    fontSize: '5rem',
     fontFamily: '"Playfair Display", serif',
     fontWeight: '400',
-    fontStyle: 'italic',
-    margin: 0,
-    lineHeight: 1
+    lineHeight: '0.9',
+    margin: 0
   },
   heroSubtitle: {
     fontSize: '1rem',
     fontWeight: '300',
-    color: '#666',
-    marginTop: '20px',
-    letterSpacing: '1px'
+    marginTop: '30px',
+    letterSpacing: '1px',
+    opacity: 0.6
   },
-  main: {
-    maxWidth: '1400px',
-    margin: '0 auto',
-    padding: '0 40px 100px 40px'
+  main: { 
+    maxWidth: '1400px', 
+    margin: '0 auto', 
+    padding: '0 60px 150px 60px' 
   },
-  sectionHeader: {
+  sectionHeader: { 
     textAlign: 'center',
-    marginBottom: '60px'
+    marginBottom: '80px'
   },
   categoryTitle: {
-    fontSize: '1.5rem',
-    fontWeight: '300',
+    fontSize: '0.8rem',
     textTransform: 'uppercase',
-    letterSpacing: '6px',
-    marginBottom: '15px'
+    letterSpacing: '10px',
+    fontWeight: '300'
   },
-  divider: {
-    width: '40px',
-    height: '1px',
-    backgroundColor: '#d46a4e',
-    margin: '0 auto'
+  countText: {
+    fontSize: '0.7rem',
+    opacity: 0.4,
+    marginTop: '10px'
   },
   grid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-    gap: '60px'
+    gridTemplateColumns: 'repeat(2, 1fr)', // SOLO 2 COLUMNAS PARA MÁS EXCLUSIVIDAD
+    gap: '40px'
   },
   card: {
-    cursor: 'pointer'
+    display: 'flex',
+    flexDirection: 'column',
+    transition: '0.5s ease'
   },
   imageWrapper: {
-    aspectRatio: '3/4',
-    backgroundColor: '#f9f9f9',
+    aspectRatio: '2/3',
+    backgroundColor: '#f8f8f8',
     overflow: 'hidden',
-    marginBottom: '20px'
+    position: 'relative'
   },
-  image: {
-    width: '100%',
-    height: '100%',
-    objectFit: 'cover'
+  image: { 
+    width: '100%', 
+    height: '100%', 
+    objectFit: 'cover' 
   },
-  cardInfo: {
-    textAlign: 'center'
+  cardInfo: { 
+    padding: '25px 0',
+    borderBottom: '1px solid #f0f0f0'
   },
-  prodName: {
-    fontSize: '1rem',
-    fontWeight: '400',
-    margin: '0 0 8px 0',
-    textTransform: 'uppercase',
-    letterSpacing: '1px'
+  prodName: { 
+    margin: '0 0 10px 0', 
+    fontSize: '1.2rem', 
+    fontFamily: '"Playfair Display", serif',
+    fontWeight: '400'
   },
-  price: {
-    fontSize: '0.9rem',
-    color: '#d46a4e',
-    fontWeight: '600'
+  priceContainer: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center'
   },
-  loadingContainer: {
+  price: { 
+    fontSize: '0.85rem', 
+    fontWeight: '300', 
+    letterSpacing: '2px' 
+  },
+  minimalAdd: {
+    background: 'none',
+    border: '1px solid #1a1a1a',
+    borderRadius: '50%',
+    width: '30px',
+    height: '30px',
+    cursor: 'pointer',
+    fontSize: '1.2rem',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  footer: { 
+    padding: '100px 20px', 
     textAlign: 'center',
-    padding: '100px 0',
-    letterSpacing: '2px',
-    textTransform: 'uppercase',
-    fontSize: '0.8rem'
+    borderTop: '1px solid #f0f0f0'
   },
-  footer: {
-    padding: '80px 20px',
-    borderTop: '1px solid #f2f2f2',
-    textAlign: 'center'
+  footerText: { 
+    fontSize: '0.7rem', 
+    letterSpacing: '6px', 
+    opacity: 0.5 
   },
-  footerText: {
-    fontSize: '0.8rem',
+  loading: {
+    textAlign: 'center',
     letterSpacing: '4px',
-    fontWeight: '600'
-  },
-  footerSub: {
+    textTransform: 'uppercase',
     fontSize: '0.7rem',
-    color: '#999',
-    marginTop: '10px'
+    padding: '100px 0'
   }
 };
