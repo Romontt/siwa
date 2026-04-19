@@ -1,7 +1,7 @@
 // Sacamos las funciones que ocupamos de las librerías globales
 const { useState, useEffect } = React;
 
-// CONFIGURACIÓN DE SUPABASE (Extraída de tu .env.local)
+// Asegúrate de que sea exactamente así, sin espacios dentro de las comillas
 const SUPABASE_URL = 'https://hvnpkljyooqcdzwdptgt.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc2MiOiJmcm9tLWJlbG93LXByb2R1Y3RzLSI1InJlZ3I1I2Imh2bnBkljyooqcdzwdptgt.eyJpZCI6Imh2bnBkljyooqcdzwdptgtLCJpYXQiOjE3M2E2MTM2MjA1MjE4LCJleHAiOjIxNDI3MTA1MjE4fQ.-pq3iVzqjsJCyGNXkFP1HSIQEBTtr7i7ptsY6FYjJZ0';
 
