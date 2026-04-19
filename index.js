@@ -27,13 +27,14 @@ function App() {
     return (
         <div>
             <nav className="nav-container">
-                <div className="logo">LA TIENDITA DE DORIS</div>
+                <div className="logo">Doris</div>
+                <div style={{fontSize: '0.7rem', letterSpacing: '3px'}}>COSTA RICA</div>
             </nav>
 
             <header className="hero">
-                <div style={{maxWidth: '600px', margin: '0 auto'}}>
-                    <h1 style={{fontSize: '3rem', margin: '0'}}>Selección Premium</h1>
-                    <p style={{opacity: 0.9}}>Moda americana curada con elegancia en Guápiles.</p>
+                <div style={{overflow: 'hidden'}}>
+                    <p style={{letterSpacing: '10px', fontSize: '0.6rem', marginBottom: '20px', color: '#0d211a'}}>NEW COLLECTION</p>
+                    <h1>Boutique <i>Moderne</i></h1>
                 </div>
             </header>
 
@@ -51,19 +52,22 @@ function App() {
 
             <main className="main-content">
                 {loading ? (
-                    <p style={{textAlign: 'center'}}>Cargando galería...</p>
+                    <p style={{textAlign: 'center', letterSpacing: '10px', marginTop: '100px'}}>ESPERE...</p>
                 ) : (
                     <div className="product-grid">
-                        {productos.map(p => (
-                            <article key={p.id} className="product-card">
+                        {productos.map((p, index) => (
+                            <article 
+                                key={p.id} 
+                                className="product-card"
+                                style={{ animationDelay: `${index * 0.1}s` }}
+                            >
                                 <div className="image-container">
                                     <img src={p.imagen_url} alt={p.nombre} />
-                                    <div className="badge-cat">{p.categoria}</div>
                                 </div>
-                                <div className="card-content">
+                                <div className="product-info">
+                                    <p style={{fontSize: '0.6rem', letterSpacing: '2px', opacity: 0.5}}>{p.categoria.toUpperCase()}</p>
                                     <h3>{p.nombre}</h3>
-                                    <div className="price-tag">₡{p.precio.toLocaleString()}</div>
-                                    <button className="btn-detalles">Ver más información</button>
+                                    <div className="price">₡{p.precio.toLocaleString()}</div>
                                 </div>
                             </article>
                         ))}
@@ -71,8 +75,9 @@ function App() {
                 )}
             </main>
 
-            <footer style={{padding: '50px', background: '#0a192f', color: 'white', textAlign: 'center'}}>
-                <p>La Tiendita de Doris © 2026</p>
+            <footer style={{padding: '150px 8% 50px', textAlign: 'center', borderTop: '1px solid #eee'}}>
+                <div className="logo" style={{fontSize: '1.2rem', marginBottom: '30px'}}>Doris</div>
+                <p style={{fontSize: '0.6rem', letterSpacing: '5px', opacity: 0.4}}>PRIVACIDAD / TÉRMINOS / 2026</p>
             </footer>
         </div>
     );
