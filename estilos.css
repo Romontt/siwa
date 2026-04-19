@@ -1,184 +1,177 @@
+/* Importar fuentes elegantes: Playfair para títulos, Montserrat para lectura */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&family=Playfair+Display:ital,wght@0,700;1,700&display=swap');
+
 :root {
-  --primario: #d46a4e;      /* Terracota */
-  --primario-dark: #b85a42;
-  --fondo: #f9f7f2;         /* Crema suave */
-  --texto: #2d3436;
-  --texto-light: #636e72;
+  --primario: #d46a4e;      /* Terracota elegante */
+  --primario-dark: #b55036; 
+  --fondo: #faf9f6;         /* Un crema más "hueso", muy premium */
+  --texto: #1a1a1a;         /* Un negro casi puro para contraste */
+  --texto-suave: #636e72;
   --blanco: #ffffff;
-  --shadow: 0 8px 30px rgba(0,0,0,0.08);
-  --radius: 16px;
+  --borde: rgba(212, 106, 78, 0.1);
 }
 
 body {
   background-color: var(--fondo);
   color: var(--texto);
-  font-family: 'Poppins', 'Segoe UI', system-ui, sans-serif;
+  font-family: 'Montserrat', sans-serif;
   margin: 0;
-  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* --- Navegación Superior --- */
+/* --- HEADER Y NAVEGACIÓN --- */
 header {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(10px); /* Efecto vidrio empañado */
-  padding: 1.5rem;
+  background-color: rgba(250, 249, 246, 0.95);
+  backdrop-filter: blur(10px);
+  padding: 1.5rem 0;
   position: sticky;
   top: 0;
   z-index: 1000;
-  border-bottom: 1px solid rgba(212, 106, 78, 0.1);
+  border-bottom: 1px solid var(--borde);
   text-align: center;
 }
 
-.logo-container h1 {
-  font-family: 'Playfair Display', serif; /* Fuente elegante para el nombre */
+.logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.2rem;
+  font-weight: 700;
   color: var(--primario);
-  margin: 0 0 1rem 0;
-  letter-spacing: 1px;
-  font-size: 2rem;
+  margin-bottom: 1rem;
+  letter-spacing: -0.5px;
 }
 
-.nav-filters {
+nav {
   display: flex;
   justify-content: center;
-  gap: 12px;
-  flex-wrap: wrap;
+  gap: 25px;
+  margin-top: 15px;
 }
 
-.btn-filter {
-  background: var(--blanco);
-  border: 1px solid #eee;
-  padding: 8px 20px;
-  border-radius: 30px;
+nav button {
+  background: none;
+  border: none;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 400;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 1.5px;
   cursor: pointer;
-  font-weight: 500;
-  transition: all 0.3s ease;
-  color: var(--texto-light);
+  color: var(--texto-suave);
+  position: relative;
+  transition: color 0.3s;
+  padding: 5px 0;
 }
 
-.btn-filter:hover, .btn-filter.active {
-  background: var(--primario);
-  color: white;
-  border-color: var(--primario);
-  box-shadow: 0 4px 12px rgba(212, 106, 78, 0.2);
+nav button:hover {
+  color: var(--primario);
 }
 
-/* --- Hero / Banner --- */
+/* Línea animada debajo de los botones del menú */
+nav button::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 1px;
+  bottom: 0;
+  left: 0;
+  background-color: var(--primario);
+  transition: width 0.3s;
+}
+
+nav button:hover::after {
+  width: 100%;
+}
+
+/* --- HERO SECTION --- */
 .hero {
-  padding: 80px 20px;
+  padding: 100px 20px;
   text-align: center;
-  background: linear-gradient(rgba(212, 106, 78, 0.05), rgba(212, 106, 78, 0.1));
-  margin-bottom: 40px;
 }
 
-.hero h2 {
-  font-size: 2.5rem;
+.hero h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 3.5rem;
+  font-style: italic;
   margin-bottom: 10px;
   color: var(--texto);
 }
 
-/* --- Grid de Productos --- */
+.hero p {
+  font-weight: 300;
+  font-size: 1.1rem;
+  letter-spacing: 0.5px;
+  color: var(--texto-suave);
+}
+
+/* --- GRID DE PRODUCTOS --- */
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 30px;
-  padding: 0 40px 40px 40px;
+  gap: 40px; /* Más espacio entre tarjetas para que respiren */
+  padding: 40px;
   max-width: 1400px;
   margin: 0 auto;
 }
 
-/* --- Tarjeta de Producto (Mejorada) --- */
+/* --- TARJETA ELEGANTE --- */
 .card {
-  background: var(--blanco);
-  border-radius: var(--radius);
+  background: transparent; /* Sin fondo para un look más limpio */
+  border-radius: 0; /* Bordes rectos suelen verse más "editorial/moda" */
   overflow: hidden;
-  box-shadow: var(--shadow);
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  border: 1px solid rgba(0,0,0,0.03);
-  position: relative;
+  transition: all 0.4s ease;
 }
 
-.card:hover {
-  transform: translateY(-12px);
-  box-shadow: 0 15px 45px rgba(0,0,0,0.12);
-}
-
-.image-wrapper {
-  position: relative;
+.card-img-container {
   overflow: hidden;
+  position: relative;
+  background-color: #eee;
 }
 
 .card img {
   width: 100%;
-  height: 380px;
+  height: 400px;
   object-fit: cover;
-  transition: transform 0.6s ease;
+  transition: transform 0.8s cubic-bezier(0.2, 1, 0.3, 1);
 }
 
 .card:hover img {
-  transform: scale(1.08);
+  transform: scale(1.05); /* Zoom muy sutil */
 }
 
 .card-info {
-  padding: 20px;
-  background: var(--blanco);
+  padding: 20px 0; /* Sin padding lateral para alinear con la imagen */
+  text-align: left; /* Alineado a la izquierda es más elegante */
 }
 
-.card-category {
-  font-size: 0.75rem;
-  color: var(--primario);
-  font-weight: 700;
+.card-info h3 {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 400;
+  font-size: 1rem;
+  margin: 0 0 8px 0;
   text-transform: uppercase;
-  margin-bottom: 8px;
-  display: block;
+  letter-spacing: 1px;
 }
 
-.card-title {
-  font-size: 1.1rem;
+.card-info .precio {
   font-weight: 600;
-  margin: 0 0 12px 0;
-  color: var(--texto);
+  font-size: 1.1rem;
+  color: var(--primario);
 }
 
-.card-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-top: 1px solid #f1f1f1;
-  padding-top: 15px;
-}
-
-.price {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--texto);
-}
-
-.btn-add-cart {
+/* --- BOTÓN DE CARRITO ICONO --- */
+.cart-icon {
+  position: fixed;
+  right: 30px;
+  bottom: 30px;
   background: var(--primario);
   color: white;
-  border: none;
-  width: 40px;
-  height: 40px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
-  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.2rem;
-  transition: background 0.3s ease;
-}
-
-.btn-add-cart:hover {
-  background: var(--primario-dark);
-}
-
-/* Responsivo para celulares */
-@media (max-width: 600px) {
-  .grid {
-    grid-template-columns: 1fr 1fr; /* Dos columnas en móvil */
-    gap: 15px;
-    padding: 15px;
-  }
-  .card img { height: 200px; }
-  .hero h2 { font-size: 1.8rem; }
+  box-shadow: 0 10px 20px rgba(212, 106, 78, 0.3);
+  cursor: pointer;
+  z-index: 999;
 }
