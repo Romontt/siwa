@@ -3,55 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>La Americana de Doris</title>
+    <title>La Americana de Doris | Tienda Online</title>
     
     <link rel="stylesheet" href="estilos.css">
     
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
 </head>
 <body>
 
 <header>
-  <div class="logo-container">
     <div class="logo">La Americana de Doris</div>
-  </div>
-  
-  <nav class="nav-filters">
-    <button class="btn-filter" onclick="filtrar('Todos')">Todos</button>
-    <button class="btn-filter" onclick="filtrar('Bebé')">Bebé</button>
-    <button class="btn-filter" onclick="filtrar('Niño')">Niño</button>
-    <button class="btn-filter" onclick="filtrar('Niña')">Niña</button>
-    <button class="btn-filter" onclick="filtrar('Hombre')">Hombre</button>
-    <button class="btn-filter" onclick="filtrar('Mujer')">Mujer</button>
-  </nav>
-
-  <div class="cart-container">
-    <div class="cart-icon">🛒 <span id="cart-count">0</span></div>
-  </div>
+    <nav>
+        <button onclick="filtrar('Todos')">Todos</button>
+        <button onclick="filtrar('Bebé')">Bebé</button>
+        <button onclick="filtrar('Niño')">Niño</button>
+        <button onclick="filtrar('Niña')">Niña</button>
+        <button onclick="filtrar('Hombre')">Hombre</button>
+        <button onclick="filtrar('Mujer')">Mujer</button>
+    </nav>
 </header>
 
 <section class="hero">
-  <div class="hero-content">
     <h1>Tesoros con Historia</h1>
     <p>Ropa americana seleccionada con amor por Doris en Guápiles.</p>
-  </div>
 </section>
 
-<section id="grid-productos" class="grid">
-  <p style="text-align: center; grid-column: 1/-1;">Buscando tesoros en la tienda...</p>
-</section>
+<main class="grid" id="grid-productos">
+    </main>
+
+<div class="cart-icon" onclick="abrirCarrito()">
+    <span>🛒</span>
+    <span id="cart-count" style="font-size: 0.8rem; margin-left: 5px;">0</span>
+</div>
 
 <footer>
-  <p>© 2026 La Americana de Doris - Guápiles, Pococí, Costa Rica</p>
-  <small>Hecho con amor para Doris</small>
+    <p>© 2026 La Americana de Doris - Guápiles, Pococí, Costa Rica</p>
+    <p style="font-size: 0.7rem; opacity: 0.6; margin-top: 10px;">Piezas únicas con propósito</p>
 </footer>
 
 <script>
-  // Tu lógica de filtrado básica para empezar
-  function filtrar(categoria) {
-    console.log("Filtrando por: " + categoria);
-    // Aquí irá tu código de Supabase para actualizar el grid
-  }
+    // Función básica para los filtros
+    function filtrar(categoria) {
+        console.log("Filtrando por: " + categoria);
+        // Aquí llamarás a tu lógica de Supabase (fetch)
+    }
+
+    function abrirCarrito() {
+        alert("Próximamente: Ver tus tesoros seleccionados");
+    }
 </script>
 
 </body>
