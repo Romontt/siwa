@@ -1,140 +1,124 @@
-:root {
-    --verde-boutique: #0a1f16;
-    --dorado-soft: #c5a059;
-    --crema: #f8f5f0;
-    --negro: #050505;
-}
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;1,400&family=Montserrat:wght@200;400&display=swap');
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+    --verde-imperial: #1a3028;
+    --dorado-relieve: #c5a059;
+    --crema-tapiz: #f4f1ea;
+    --texto-oscuro: #0d211a;
+}
 
 body {
-    background-color: var(--crema);
+    background-color: var(--crema-tapiz);
+    /* Patrón sutil de fondo tipo papel tapiz antiguo */
+    background-image: url('https://www.transparenttextures.com/patterns/cream-paper.png');
     font-family: 'Montserrat', sans-serif;
-    color: var(--negro);
-    overflow-x: hidden;
+    margin: 0;
+    color: var(--texto-oscuro);
 }
 
-/* Navegación Vertical Minimalista */
+/* Navbar Elegante con Transparencia */
 .nav-container {
-    position: fixed;
-    left: 0;
-    top: 0;
-    height: 100vh;
-    width: 80px;
-    border-right: 1px solid rgba(0,0,0,0.05);
+    padding: 20px 8%;
     display: flex;
-    flex-direction: column;
     justify-content: space-between;
-    padding: 40px 0;
     align-items: center;
-    background: var(--crema);
-    z-index: 1000;
+    background: rgba(244, 241, 234, 0.9);
+    border-bottom: 1px solid rgba(197, 160, 89, 0.2);
 }
 
-.logo-vertical {
-    writing-mode: vertical-rl;
-    text-transform: uppercase;
-    letter-spacing: 8px;
+.logo {
     font-family: 'Cormorant Garamond', serif;
-    font-size: 1.5rem;
-    color: var(--verde-boutique);
+    font-size: 2.5rem;
+    letter-spacing: 12px;
+    font-weight: 300;
+    color: var(--verde-imperial);
+    text-shadow: 1px 1px 0px rgba(255,255,255,0.5);
 }
 
-/* Layout de Pantalla Partida (Split Screen) */
-.main-wrapper {
-    margin-left: 80px; /* Espacio para la nav vertical */
-}
-
-.product-section {
-    height: 100vh;
-    display: flex;
-    position: relative;
-    border-bottom: 1px solid rgba(0,0,0,0.1);
-    scroll-snap-align: start;
-}
-
-/* Mitad Imagen */
-.image-half {
-    flex: 1;
-    overflow: hidden;
-    position: relative;
-}
-
-.image-half img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 2s ease;
-}
-
-.product-section:hover .image-half img {
-    transform: scale(1.1);
-}
-
-/* Mitad Contenido */
-.content-half {
-    flex: 1;
+/* Banner de Terciopelo con Bordes Curvos */
+.hero-velvet {
+    background: var(--verde-imperial);
+    background-image: url('https://www.transparenttextures.com/patterns/dark-matter.png'); /* Efecto textura tela */
+    height: 450px;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: 0 10%;
-    background: var(--crema);
+    align-items: center;
+    position: relative;
+    box-shadow: inset 0 0 100px rgba(0,0,0,0.5);
+    border-bottom: 15px solid var(--dorado-relieve);
 }
 
-.cat-label {
-    font-size: 0.7rem;
-    letter-spacing: 5px;
-    color: var(--dorado-soft);
-    margin-bottom: 20px;
-    text-transform: uppercase;
+/* El borde festoneado (ondas) debajo del verde */
+.hero-velvet::after {
+    content: "";
+    position: absolute;
+    bottom: -30px;
+    left: 0;
+    width: 100%;
+    height: 40px;
+    background-image: radial-gradient(circle at 10px -5px, transparent 12px, var(--dorado-relieve) 13px);
+    background-size: 20px 40px;
 }
 
-.product-title {
+.hero-velvet h1 {
     font-family: 'Cormorant Garamond', serif;
-    font-size: clamp(3rem, 6vw, 5rem);
-    line-height: 0.9;
-    margin-bottom: 30px;
-    font-style: italic;
+    font-size: 5rem;
+    color: white;
+    font-weight: 400;
+    margin: 0;
+    text-align: center;
+    line-height: 1;
+    text-shadow: 2px 4px 10px rgba(0,0,0,0.3);
 }
 
-.price-box {
-    font-size: 1.2rem;
-    font-weight: 300;
-    letter-spacing: 2px;
-    border-top: 1px solid var(--negro);
-    padding-top: 20px;
-    display: inline-block;
-    width: fit-content;
+.hero-velvet h1 i { font-style: italic; display: block; font-size: 6rem; }
+
+/* Adorno Dorado debajo del Título */
+.ornament {
+    width: 200px;
+    height: 50px;
+    margin-top: 20px;
+    background: url('https://cdn-icons-png.flaticon.com/512/1041/1041933.png') no-repeat center;
+    background-size: contain;
+    filter: sepia(1) saturate(5) hue-rotate(10deg); /* Convierte a dorado */
+    opacity: 0.7;
 }
 
-/* Filtros Flotantes Horizontales */
-.filters {
-    position: fixed;
-    top: 30px;
-    right: 50px;
-    z-index: 1001;
+/* Sección de Maniquí / Decoración Central */
+.center-piece {
+    text-align: center;
+    padding: 80px 0;
+    background-image: url('https://www.transparenttextures.com/patterns/shattered-island.png'); /* Textura damasco */
+}
+
+.mannequin-icon {
+    width: 100px;
+    opacity: 0.6;
+    margin-bottom: 20px;
+}
+
+/* Filtros Estilo Etiqueta de Ropa */
+.filter-bar {
     display: flex;
+    justify-content: center;
     gap: 30px;
+    padding-bottom: 50px;
 }
 
-.filter-item {
-    background: none;
+.filter-btn {
     border: none;
-    font-size: 0.6rem;
-    letter-spacing: 3px;
+    background: none;
+    font-size: 0.75rem;
+    letter-spacing: 4px;
     text-transform: uppercase;
     cursor: pointer;
-    color: var(--negro);
-    opacity: 0.4;
-    transition: 0.3s;
+    color: var(--texto-oscuro);
+    padding-bottom: 5px;
+    transition: 0.4s;
 }
 
-.filter-item.active {
-    opacity: 1;
-    font-weight: bold;
-}
-
-/* Scroll Snap para que se sienta como una presentación */
-html {
-    scroll-snap-type: y mandatory;
+.filter-btn.active {
+    color: var(--dorado-relieve);
+    border-bottom: 1px solid var(--dorado-relieve);
 }
