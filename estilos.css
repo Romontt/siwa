@@ -1,121 +1,101 @@
+/* --- VARIABLES BASE (TU CÓDIGO) --- */
 :root {
-    --crema: #fcfaf7;
-    --shadow: 0 10px 30px rgba(0,0,0,0.05);
-    --transition: all 0.5s ease;
+    --verde-boutique: #0d2c24;
+    --naranja-siena: #d46a4e;
+    --azul-noche: #0f172a;
+    --crema-fondo: #fcfaf7;
+    --blanco: #ffffff;
+    --shadow: 0 10px 30px rgba(0,0,0,0.08);
+    --transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* --- TEMAS POR CATEGORÍA --- */
-.tema-Todos { --accent: #d46a4e; --bg-hero: #0d2c24; --text: #0f172a; }
-.tema-Bebé { --accent: #f0b4b4; --bg-hero: #fdf2f2; --text: #7c4a4a; --radius: 50px; }
-.tema-Niño { --accent: #6495ed; --bg-hero: #eef4ff; --text: #2d4263; --radius: 15px; }
-.tema-Niña { --accent: #da70d6; --bg-hero: #fff0f5; --text: #603060; --radius: 30px; }
-.tema-Hombre { --accent: #2c3e50; --bg-hero: #1a252f; --text: #ecf0f1; --radius: 5px; }
-.tema-Mujer { --accent: #c5a059; --bg-hero: #1a1a1a; --text: #ffffff; --radius: 0px; }
+/* --- CONFIGURACIÓN DE TEMAS --- */
+
+/* BEBÉ: Suave, redondo, tonos pastel combinados con naranja */
+.tema-Bebé {
+    --primary: #f0b4b4; 
+    --hero-bg: #fff5f5; 
+    --radius: 60px;
+    --font-main: 'Outfit', sans-serif;
+}
+
+/* NIÑO/A: Divertido, bordes medios */
+.tema-Niño, .tema-Niña {
+    --primary: #6495ed; 
+    --hero-bg: #eef4ff; 
+    --radius: 30px;
+}
+
+/* HOMBRE: Recto, elegante, azul profundo */
+.tema-Hombre {
+    --primary: var(--azul-noche); 
+    --hero-bg: #1e293b; 
+    --radius: 4px;
+}
+
+/* MUJER: Alta costura, bordes elegantes */
+.tema-Mujer {
+    --primary: var(--verde-boutique); 
+    --hero-bg: #051410; 
+    --radius: 0px;
+}
+
+/* TODOS: El balance original */
+.tema-Todos {
+    --primary: var(--naranja-siena);
+    --hero-bg: var(--verde-boutique);
+    --radius: 40px;
+}
+
+/* --- APLICACIÓN DE ESTILOS DINÁMICOS --- */
 
 body {
-    background-color: var(--crema);
+    background-color: var(--crema-fondo);
     font-family: 'Outfit', sans-serif;
     margin: 0;
     transition: var(--transition);
 }
 
-/* Navbar Adaptable */
-.nav-bar {
-    background: white;
-    padding: 15px 5%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    box-shadow: var(--shadow);
-}
-
-.sua-text {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 2.2rem;
-    font-weight: 600;
-    letter-spacing: 12px;
-    color: #0d2c24;
-}
-
-/* --- HERO DINÁMICO --- */
+/* El Hero ahora cambia de color y forma */
 .hero {
-    margin: 20px 5%;
-    height: 400px;
-    display: flex;
-    align-items: center;
-    padding: 0 60px;
-    border-radius: var(--radius, 40px);
-    background: var(--bg-hero);
-    color: var(--text);
-    transition: var(--transition);
-    position: relative;
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    background: var(--hero-bg);
+    margin: 30px 5%;
+    border-radius: var(--radius);
     overflow: hidden;
+    height: 480px;
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.2);
+    transition: var(--transition);
 }
 
-.hero h1 {
+.hero-content h1 {
     font-family: 'Cormorant Garamond', serif;
     font-size: 4rem;
-    z-index: 2;
+    color: white; /* Se ajusta si el fondo es muy claro en JS */
+    transition: var(--transition);
 }
 
-/* --- BOTONES DE CATEGORÍA --- */
-.nav-links { display: flex; gap: 15px; }
-.nav-links button {
-    border: 1px solid #eee;
-    background: white;
-    padding: 10px 20px;
-    border-radius: 30px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: 0.3s;
-}
-
-.nav-links button.active {
-    background: var(--accent);
-    color: white;
-    border-color: var(--accent);
-}
-
-/* --- CARDS ADAPTABLES --- */
-.grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 30px;
-    padding: 40px 5%;
-}
-
+/* Las tarjetas también cambian su forma según la sección */
 .card {
-    background: white;
-    border-radius: var(--radius, 25px);
+    background: var(--blanco);
+    border-radius: var(--radius);
     padding: 15px;
     box-shadow: var(--shadow);
     transition: var(--transition);
-    border: 2px solid transparent;
-}
-
-.card:hover {
-    border-color: var(--accent);
-    transform: translateY(-10px);
+    border: 1px solid rgba(0,0,0,0.05);
 }
 
 .card-img {
     width: 100%;
-    aspect-ratio: 1/1;
-    border-radius: calc(var(--radius) / 1.5);
+    aspect-ratio: 1/1.2;
+    border-radius: calc(var(--radius) * 0.7);
     object-fit: cover;
+    transition: var(--transition);
 }
 
-.btn-action {
-    width: 100%;
-    padding: 12px;
-    border: none;
-    border-radius: var(--radius, 10px);
-    background: var(--accent);
-    color: white;
-    font-weight: 700;
-    margin-top: 15px;
-    cursor: pointer;
+.btn-add {
+    background: var(--primary);
+    border-radius: calc(var(--radius) * 0.5);
+    /* ... resto de tu estilo ... */
 }
