@@ -23,7 +23,7 @@ function App() {
         loadData();
     }, [cat]);
 
-    // Función de navegación optimizada para el footer
+    // Función de navegación optimizada
     const navTo = (nuevaCat) => {
         setCat(nuevaCat);
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -84,25 +84,28 @@ function App() {
                         <p className="footer-location">SUA KIDS / Pococí, Limón</p>
                     </div>
 
-                    {/* Enlaces directos */}
-                    <div className="footer-links">
-                        <h4>Colecciones</h4>
-                        <ul>
-                            {['Bebé', 'Niño', 'Niña'].map(c => (
-                                <li key={c}>
-                                    <button onClick={() => navTo(c)}>{c}</button>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
+                    {/* Contenedor para manejar las columnas en móvil */}
+                    <div className="footer-links-wrapper">
+                        {/* Enlaces directos */}
+                        <div className="footer-links">
+                            <h4>Colecciones</h4>
+                            <ul>
+                                {['Bebé', 'Niño', 'Niña'].map(c => (
+                                    <li key={c}>
+                                        <button onClick={() => navTo(c)}>{c}</button>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
 
-                    {/* Contacto rápido */}
-                    <div className="footer-links">
-                        <h4>Contacto</h4>
-                        <ul>
-                            <li><button onClick={() => window.open('https://wa.me/50688888888')}>WhatsApp</button></li>
-                            <li><button>Instagram</button></li>
-                        </ul>
+                        {/* Contacto rápido */}
+                        <div className="footer-links">
+                            <h4>Contacto</h4>
+                            <ul>
+                                <li><button onClick={() => window.open('https://wa.me/50688888888')}>WhatsApp</button></li>
+                                <li><button>Instagram</button></li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
 
@@ -110,7 +113,7 @@ function App() {
                 <div className="footer-bottom">
                     <div>© 2026 SUA Boutique</div>
                     <div className="designer-credit">
-                        DISEÑO POR <span style={{color: 'white', fontWeight: '700'}}>MONTZUCR</span>
+                        DISEÑADO POR <span style={{color: 'white', fontWeight: '700'}}>MONTZUCR</span>
                     </div>
                 </div>
             </footer>
