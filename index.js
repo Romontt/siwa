@@ -23,13 +23,27 @@ function App() {
         loadData();
     }, [cat]);
 
+    // Función para obtener el título del Hero según la categoría
+    const getHeroTitle = () => {
+        if (cat === 'Todos') return "Tesoro Infantil";
+        if (cat === 'Bebé') return "Primeros Pasos";
+        return cat;
+    };
+
     return (
+        /* La clase dinámica cambia el fondo pastel en el CSS */
         <div className={`app-container tema-${cat}`}>
             <nav className="nav-bar">
+                {/* Clase sua-logo para aplicar el letter-spacing de 15px */}
                 <div className="sua-logo">SUA</div>
+                
                 <div className="nav-links">
                     {['Todos', 'Bebé', 'Niño', 'Niña'].map(c => (
-                        <button key={c} className={cat === c ? 'active' : ''} onClick={() => setCat(c)}>
+                        <button 
+                            key={c} 
+                            className={cat === c ? 'active' : ''} 
+                            onClick={() => setCat(c)}
+                        >
                             {c}
                         </button>
                     ))}
@@ -38,7 +52,7 @@ function App() {
 
             <header className="hero">
                 <small style={{letterSpacing: '3px', textTransform: 'uppercase', opacity: 0.6}}>Est. 2026</small>
-                <h1>{cat === 'Todos' ? 'Tesoro Infantil' : cat}</h1>
+                <h1>{getHeroTitle()}</h1>
                 <p style={{maxWidth: '500px', margin: '20px auto', opacity: 0.7}}>
                     Selección exclusiva de prendas importadas con la calidad que tu familia merece.
                 </p>
@@ -47,15 +61,30 @@ function App() {
             <main className="grid">
                 {items.map(item => (
                     <article key={item.id} className="card">
-                        <img src={item.imagen_url} className="card-img" alt={item.nombre} />
+                        <div className="card-image-wrapper">
+                            <img src={item.imagen_url} className="card-img" alt={item.nombre} />
+                        </div>
                         <div className="card-info">
+                            <small style={{opacity: 0.5, textTransform: 'uppercase'}}>{item.categoria}</small>
                             <h3>{item.nombre}</h3>
                             <div className="price-tag">₡{item.precio?.toLocaleString()}</div>
-                            <button style={{
-                                width: '100%', marginTop: '20px', padding: '12px',
-                                background: 'var(--verde-sua)', color: 'white',
-                                border: 'none', borderRadius: '30px', cursor: 'pointer'
-                            }}>Consultar WhatsApp</button>
+                            
+                            <button 
+                                onClick={() => window.open(`https://wa.me/50688888888?text=Hola, me interesa el producto: ${item.nombre}`)}
+                                style={{
+                                    width: '100%', 
+                                    marginTop: '20px', 
+                                    padding: '12px',
+                                    background: 'var(--verde-boutique)', 
+                                    color: 'white',
+                                    border: 'none', 
+                                    borderRadius: '30px', 
+                                    cursor: 'pointer',
+                                    fontWeight: '600'
+                                }}
+                            >
+                                Consultar WhatsApp
+                            </button>
                         </div>
                     </article>
                 ))}
