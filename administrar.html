@@ -1,21 +1,186 @@
-// Fragmento de la lógica de edición en administrar.html
-const { data, error } = await _supabase
-    .from('productos')
-    .select('*')
-    .order('categoria', { ascending: true });
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administrar Inventario | SUA Boutique</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root { 
+            --v-fondo: #0a1f1a; --v-card: #0d2c24; --naranja: #d46a4e; 
+            --texto: #f1f5f9; --input-bg: #163d33; --rojo: #ef4444;
+        }
+        
+        body { font-family: 'Outfit', sans-serif; background: var(--v-fondo); margin: 0; color: var(--texto); min-height: 100vh; }
+        .header { padding: 20px; display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.2); }
+        .btn-back { text-decoration: none; color: var(--naranja); font-weight: 700; }
 
-// Renderizado por categorías
-{['Bebé', 'Niño', 'Niña'].map(cat => (
-    <section key={cat}>
-        <h3 style={{borderBottom: '2px solid var(--naranja)'}}>{cat}</h3>
-        <div className="admin-grid">
-            {productos.filter(p => p.categoria === cat).map(p => (
-                <div className="edit-card">
-                    <span>{p.nombre}</span>
-                    <input type="number" defaultValue={p.precio} />
-                    <button onClick={() => updateProduct(p.id)}>Guardar</button>
+        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
+        
+        /* Tabs de Categoría */
+        .tabs { display: flex; gap: 10px; margin-bottom: 30px; justify-content: center; }
+        .tab-btn { 
+            padding: 12px 25px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.1);
+            background: var(--v-card); color: white; cursor: pointer; transition: 0.3s;
+        }
+        .tab-btn.active { background: var(--naranja); border-color: var(--naranja); font-weight: 700; }
+
+        /* Grid de Productos */
+        .products-grid { 
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; 
+        }
+
+        .product-edit-card { 
+            background: var(--v-card); border-radius: 20px; padding: 20px; 
+            display: flex; gap: 15px; border: 1px solid rgba(255,255,255,0.05);
+        }
+        .prod-img { width: 100px; height: 120px; border-radius: 12px; object-fit: cover; background: #000; }
+        .prod-info { flex: 1; }
+        .prod-title { font-size: 1rem; font-weight: 700; margin: 0 0 10px 0; color: var(--naranja); }
+
+        .edit-fields { display: grid; gap: 10px; }
+        .field { display: flex; flex-direction: column; gap: 4px; }
+        .field label { font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; }
+        input { 
+            background: var(--input-bg); border: 1px solid rgba(255,255,255,0.1); 
+            color: white; padding: 8px; border-radius: 8px; font-family: inherit;
+        }
+
+        .status-toggle { display: flex; align-items: center; gap: 10px; margin-top: 10px; font-size: 0.8rem; }
+        .btn-save { 
+            width: 100%; margin-top: 15px; padding: 10px; border-radius: 10px; border: none;
+            background: #10b981; color: white; font-weight: 700; cursor: pointer;
+        }
+        .btn-delete { background: none; border: none; color: var(--rojo); font-size: 0.8rem; cursor: pointer; margin-top: 10px; text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        const _supabase = supabase.createClient('https://hvnpkljyoocqdzwdptgt.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2bnBrbGp5b29jcWR6d2RwdGd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2MTAxMTQsImV4cCI6MjA5MjE4NjExNH0.-pq3iVzqJsJCyGNXkFPlHSIQeBTrr7i7ptsY6FYjJZ0');
+
+        function AdminInventario() {
+            const [productos, setProductos] = useState([]);
+            const [catActiva, setCatActiva] = useState('Bebé');
+            const [loading, setLoading] = useState(true);
+
+            useEffect(() => { cargarProductos(); }, []);
+
+            const cargarProductos = async () => {
+                setLoading(true);
+                const { data } = await _supabase.from('productos').select('*').order('created_at', { ascending: false });
+                setProductos(data || []);
+                setLoading(false);
+            };
+
+            const actualizarProducto = async (id, camposOriginales) => {
+                // Cálculo de oferta en tiempo real
+                const nuevoPrecioOferta = camposOriginales.tiene_descuento 
+                    ? camposOriginales.precio - (camposOriginales.precio * (camposOriginales.porcentaje_descuento / 100))
+                    : null;
+
+                const { error } = await _supabase
+                    .from('productos')
+                    .update({ ...camposOriginales, precio_oferta: nuevoPrecioOferta })
+                    .eq('id', id);
+
+                if (error) alert("Error al actualizar");
+                else alert("¡Cambios guardados!");
+                cargarProductos();
+            };
+
+            const eliminarProducto = async (id) => {
+                if(confirm("¿Seguro que quieres eliminar este producto?")){
+                    await _supabase.from('productos').delete().eq('id', id);
+                    cargarProductos();
+                }
+            };
+
+            return (
+                <div>
+                    <div className="header">
+                        <a href="admin.html" className="btn-back">← VOLVER</a>
+                        <h2 style={{margin: 0, fontSize: '1.1rem'}}>Gestionar Inventario</h2>
+                        <div style={{width: '60px'}}></div>
+                    </div>
+
+                    <div className="container">
+                        <div className="tabs">
+                            {['Bebé', 'Niño', 'Niña'].map(c => (
+                                <button key={c} className={`tab-btn ${catActiva === c ? 'active' : ''}`} onClick={() => setCatActiva(c)}>
+                                    {c}
+                                </button>
+                            ))}
+                        </div>
+
+                        {loading ? <p style={{textAlign: 'center'}}>Cargando prendas...</p> : (
+                            <div className="products-grid">
+                                {productos.filter(p => p.categoria === catActiva).map(p => (
+                                    <ProductRow 
+                                        key={p.id} 
+                                        producto={p} 
+                                        onSave={(datos) => actualizarProducto(p.id, datos)} 
+                                        onDelete={() => eliminarProducto(p.id)}
+                                    />
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 </div>
-            ))}
-        </div>
-    </section>
-))}
+            );
+        }
+
+        function ProductRow({ producto, onSave, onDelete }) {
+            const [edit, setEdit] = useState({...producto});
+
+            return (
+                <div className="product-edit-card">
+                    <img src={producto.imagen_url} className="prod-img" />
+                    <div className="prod-info">
+                        <h3 className="prod-title">{producto.nombre}</h3>
+                        
+                        <div className="edit-fields">
+                            <div className="field">
+                                <label>Precio (₡)</label>
+                                <input type="number" value={edit.precio} onChange={e => setEdit({...edit, precio: parseFloat(e.target.value)})} />
+                            </div>
+
+                            <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px'}}>
+                                <div className="field">
+                                    <label>¿Descuento?</label>
+                                    <select style={{padding: '8px', borderRadius: '8px', background: 'var(--input-bg)', color: 'white', border: '1px solid rgba(255,255,255,0.1)'}} 
+                                            value={edit.tiene_descuento} onChange={e => setEdit({...edit, tiene_descuento: e.target.value === 'true'})}>
+                                        <option value="false">No</option>
+                                        <option value="true">Sí</option>
+                                    </select>
+                                </div>
+                                <div className="field">
+                                    <label>% Rebaja</label>
+                                    <input type="number" disabled={!edit.tiene_descuento} value={edit.porcentaje_descuento} 
+                                           onChange={e => setEdit({...edit, porcentaje_descuento: parseInt(e.target.value)})} />
+                                </div>
+                            </div>
+
+                            <div className="status-toggle">
+                                <input type="checkbox" checked={edit.disponible} onChange={e => setEdit({...edit, disponible: e.target.checked})} />
+                                <span>Mostrar en la web</span>
+                            </div>
+                        </div>
+
+                        <button className="btn-save" onClick={() => onSave(edit)}>Guardar Cambios</button>
+                        <center><button className="btn-delete" onClick={onDelete}>Eliminar prenda</button></center>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.createRoot(document.getElementById('root')).render(<AdminInventario />);
+    </script>
+</body>
+</html>
