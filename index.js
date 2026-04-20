@@ -23,8 +23,8 @@ function App() {
         loadData();
     }, [cat]);
 
-    // Función para cambiar categoría y subir al inicio (usada en el footer)
-    const handleFooterNav = (nuevaCat) => {
+    // Función de navegación optimizada para el footer
+    const navTo = (nuevaCat) => {
         setCat(nuevaCat);
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
@@ -75,46 +75,42 @@ function App() {
                 ))}
             </main>
 
+            {/* FOOTER MINIMALISTA Y AJUSTABLE */}
             <footer className="footer">
                 <div className="footer-content">
-                    {/* Columna 1: Marca y Ubicación */}
+                    {/* Marca resumida */}
                     <div className="footer-brand">
                         <div className="sua-logo">SUA</div>
-                        <p className="footer-location">
-                            SUA KIDS / Guápiles - Pococí - Limón
-                        </p>
+                        <p className="footer-location">SUA KIDS / Pococí, Limón</p>
                     </div>
 
-                    {/* Columna 2: Navegación Rápida */}
+                    {/* Enlaces directos */}
                     <div className="footer-links">
                         <h4>Colecciones</h4>
                         <ul>
                             {['Bebé', 'Niño', 'Niña'].map(c => (
                                 <li key={c}>
-                                    <button onClick={() => handleFooterNav(c)}>
-                                        {c}
-                                    </button>
+                                    <button onClick={() => navTo(c)}>{c}</button>
                                 </li>
                             ))}
                         </ul>
                     </div>
 
-                    {/* Columna 3: Redes/Contacto */}
+                    {/* Contacto rápido */}
                     <div className="footer-links">
                         <h4>Contacto</h4>
                         <ul>
                             <li><button onClick={() => window.open('https://wa.me/50688888888')}>WhatsApp</button></li>
                             <li><button>Instagram</button></li>
-                            <li><button>Facebook</button></li>
                         </ul>
                     </div>
                 </div>
 
-                {/* Parte Inferior: Créditos y Año */}
+                {/* Créditos compactos */}
                 <div className="footer-bottom">
-                    <div>© 2026 SUA Boutique. Todos los derechos reservados.</div>
+                    <div>© 2026 SUA Boutique</div>
                     <div className="designer-credit">
-                        DISEÑADO POR <span style={{color: 'white', fontWeight: '700'}}>MONTZUCR</span>
+                        DISEÑO POR <span style={{color: 'white', fontWeight: '700'}}>MONTZUCR</span>
                     </div>
                 </div>
             </footer>
