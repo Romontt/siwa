@@ -1,0 +1,21 @@
+// Fragmento de la lógica de edición en administrar.html
+const { data, error } = await _supabase
+    .from('productos')
+    .select('*')
+    .order('categoria', { ascending: true });
+
+// Renderizado por categorías
+{['Bebé', 'Niño', 'Niña'].map(cat => (
+    <section key={cat}>
+        <h3 style={{borderBottom: '2px solid var(--naranja)'}}>{cat}</h3>
+        <div className="admin-grid">
+            {productos.filter(p => p.categoria === cat).map(p => (
+                <div className="edit-card">
+                    <span>{p.nombre}</span>
+                    <input type="number" defaultValue={p.precio} />
+                    <button onClick={() => updateProduct(p.id)}>Guardar</button>
+                </div>
+            ))}
+        </div>
+    </section>
+))}
