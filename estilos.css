@@ -1,10 +1,7 @@
 :root {
     --verde-sua: #0d2c24;
     --naranja-sua: #d46a4e;
-    --azul-kids: #5b7c99;
-    --rosa-kids: #d9a7a7;
     --crema: #fdfaf5;
-    --blanco: #ffffff;
 }
 
 body { 
@@ -12,80 +9,107 @@ body {
     background-color: var(--crema); 
     font-family: 'Outfit', sans-serif; 
     color: var(--verde-sua);
+    overflow-x: hidden;
 }
 
-.app-container { transition: all 0.6s ease; }
+/* --- FONDOS PASTEL DINÁMICOS --- */
+.tema-Todos { --bg-page: linear-gradient(135deg, #fdfaf5 0%, #f7eee2 100%); --accent: var(--naranja-sua); --radius: 40px; }
+.tema-Bebé { --bg-page: linear-gradient(135deg, #fff5f5 0%, #f0dada 100%); --accent: #d9a7a7; --radius: 80px; }
+.tema-Niño { --bg-page: linear-gradient(135deg, #f0f7ff 0%, #d6e4f0 100%); --accent: #5b7c99; --radius: 20px; }
+.tema-Niña { --bg-page: linear-gradient(135deg, #fdf0ff 0%, #ebd6f0 100%); --accent: #a78bfa; --radius: 50px; }
 
-/* NAVBAR */
+.app-container { 
+    min-height: 100vh;
+    background: var(--bg-page);
+    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* NAVBAR TRANSPARENTE Y ELEGANTE */
 .nav-bar {
-    background: var(--blanco);
-    padding: 15px 5%;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    padding: 20px 5%;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.03);
     position: sticky; top: 0; z-index: 100;
 }
 
 .sua-logo {
     font-family: 'Cormorant Garamond', serif;
-    font-size: 2rem;
-    letter-spacing: 8px;
+    font-size: 2.2rem;
+    letter-spacing: 10px;
     font-weight: 600;
+    color: var(--verde-sua);
 }
 
-.nav-links button {
-    background: none; border: none; padding: 10px 20px;
-    cursor: pointer; font-size: 0.9rem; font-weight: 500;
-    text-transform: uppercase; letter-spacing: 1px;
-    color: #888; transition: 0.3s;
-}
-
-.nav-links button.active { color: var(--naranja-sua); font-weight: 700; }
-
-/* HERO DINÁMICO */
+/* HERO CON PROFUNDIDAD */
 .hero {
-    margin: 30px 5%;
-    padding: 80px 40px;
-    border-radius: var(--radius, 40px);
-    background: var(--bg-hero, var(--verde-sua));
-    color: var(--text-hero, white);
+    margin: 40px 5%;
+    padding: 100px 40px;
+    border-radius: var(--radius);
+    background: white;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.05);
     text-align: center;
-    transition: all 0.6s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Decoración abstracta en el fondo del Hero */
+.hero::before {
+    content: '';
+    position: absolute;
+    top: -50px; right: -50px;
+    width: 200px; height: 200px;
+    background: var(--bg-page);
+    border-radius: 50%;
+    opacity: 0.5;
 }
 
 .hero h1 {
     font-family: 'Cormorant Garamond', serif;
-    font-size: 3.5rem;
-    margin: 10px 0;
+    font-size: 4rem;
+    margin: 0;
+    color: var(--verde-sua);
 }
 
-/* GRID DE PRODUCTOS */
+/* CARDS TIPO BOUTIQUE */
 .grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 30px;
-    padding: 20px 5% 80px;
+    gap: 40px;
+    padding: 40px 5%;
 }
 
 .card {
-    background: var(--blanco);
-    border-radius: var(--radius, 25px);
-    padding: 15px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-    transition: 0.4s;
+    background: white;
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.03);
+    border: 1px solid rgba(255,255,255,0.8);
+    transition: 0.5s ease;
 }
 
-.card:hover { transform: translateY(-10px); }
+.card:hover {
+    transform: translateY(-15px) scale(1.02);
+    box-shadow: 0 25px 50px rgba(0,0,0,0.07);
+}
 
 .card-img {
-    width: 100%; aspect-ratio: 1/1;
-    border-radius: calc(var(--radius) / 1.5);
+    width: 100%; 
+    aspect-ratio: 1/1.2;
+    border-radius: calc(var(--radius) * 0.8);
     object-fit: cover;
 }
 
-/* TEMAS ESPECÍFICOS */
-.tema-Todos { --bg-hero: var(--verde-sua); --radius: 40px; --text-hero: white; }
-.tema-Bebé { --bg-hero: #f7e8e8; --radius: 60px; --text-hero: #7c4a4a; }
-.tema-Niño { --bg-hero: #e8eff7; --radius: 20px; --text-hero: #2d4263; }
-.tema-Niña { --bg-hero: #f2e8f7; --radius: 40px; --text-hero: #603060; }
+.card-info h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.5rem;
+    margin: 15px 0 5px;
+}
+
+.price-tag {
+    font-weight: 700;
+    color: var(--accent);
+    font-size: 1.2rem;
+}
