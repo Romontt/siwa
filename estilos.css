@@ -1,201 +1,91 @@
 :root {
-    --verde-boutique: #0d2c24; /* Verde profundo imperial */
-    --naranja-siena: #d46a4e; /* Naranja tierra tipo Punto 506 */
-    --azul-noche: #0f172a;    /* Azul elegante para acentos */
-    --crema-fondo: #fcfaf7;
+    --verde-sua: #0d2c24;
+    --naranja-sua: #d46a4e;
+    --azul-kids: #5b7c99;
+    --rosa-kids: #d9a7a7;
+    --crema: #fdfaf5;
     --blanco: #ffffff;
-    --shadow: 0 10px 30px rgba(0,0,0,0.08);
 }
 
-body {
-    background-color: var(--crema-fondo);
-    font-family: 'Outfit', sans-serif;
-    margin: 0;
-    color: var(--azul-noche);
+body { 
+    margin: 0; 
+    background-color: var(--crema); 
+    font-family: 'Outfit', sans-serif; 
+    color: var(--verde-sua);
 }
 
-/* --- LOGO SUA --- */
-.logo-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
+.app-container { transition: all 0.6s ease; }
 
-.sua-text {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 2.2rem;
-    font-weight: 600;
-    letter-spacing: 12px;
-    color: var(--verde-boutique);
-    position: relative;
-    line-height: 1;
-}
-
-.sua-text::before {
-    content: '';
-    position: absolute;
-    top: -8px;
-    left: 45%;
-    width: 6px;
-    height: 6px;
-    background: var(--naranja-siena);
-    border-radius: 50%;
-    box-shadow: 0 0 8px rgba(212, 106, 78, 0.6);
-}
-
-.sua-tagline {
-    font-size: 0.55rem;
-    letter-spacing: 4px;
-    text-transform: uppercase;
-    color: var(--naranja-siena);
-    margin-top: 5px;
-}
-
-/* --- NAVEGACIÓN --- */
+/* NAVBAR */
 .nav-bar {
     background: var(--blanco);
-    padding: 20px 5%;
+    padding: 15px 5%;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    box-shadow: var(--shadow);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+    position: sticky; top: 0; z-index: 100;
 }
 
-.nav-links {
-    display: flex;
-    gap: 25px;
+.sua-logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2rem;
+    letter-spacing: 8px;
+    font-weight: 600;
 }
 
 .nav-links button {
-    background: none;
-    border: none;
-    font-family: 'Outfit', sans-serif;
-    font-size: 0.85rem;
-    font-weight: 500;
-    cursor: pointer;
-    color: var(--azul-noche);
-    transition: 0.3s;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+    background: none; border: none; padding: 10px 20px;
+    cursor: pointer; font-size: 0.9rem; font-weight: 500;
+    text-transform: uppercase; letter-spacing: 1px;
+    color: #888; transition: 0.3s;
 }
 
-.nav-links button.active {
-    color: var(--naranja-siena);
-}
+.nav-links button.active { color: var(--naranja-sua); font-weight: 700; }
 
-/* --- HERO SECTION --- */
+/* HERO DINÁMICO */
 .hero {
-    display: grid;
-    grid-template-columns: 1.2fr 0.8fr;
-    background: var(--verde-boutique);
     margin: 30px 5%;
-    border-radius: 40px;
-    overflow: hidden;
-    height: 500px;
-    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.3);
+    padding: 80px 40px;
+    border-radius: var(--radius, 40px);
+    background: var(--bg-hero, var(--verde-sua));
+    color: var(--text-hero, white);
+    text-align: center;
+    transition: all 0.6s ease;
 }
 
-.hero-content {
-    padding: 60px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    color: var(--crema-fondo);
-}
-
-.hero-content h1 {
+.hero h1 {
     font-family: 'Cormorant Garamond', serif;
-    font-size: 4.5rem;
-    margin: 0;
-    line-height: 0.9;
+    font-size: 3.5rem;
+    margin: 10px 0;
 }
 
-.hero-content h1 i { font-style: italic; color: var(--naranja-siena); }
-
-.hero-image {
-    background: url('https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?q=80&w=2070') center/cover;
-}
-
-/* --- GRID DE PRODUCTOS --- */
-.container {
-    padding: 40px 5%;
-}
-
-.section-title {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 2.5rem;
-    margin-bottom: 40px;
-    border-bottom: 1px solid rgba(15, 23, 42, 0.1);
-    padding-bottom: 10px;
-}
-
+/* GRID DE PRODUCTOS */
 .grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 30px;
+    padding: 20px 5% 80px;
 }
 
 .card {
     background: var(--blanco);
-    border-radius: 25px;
+    border-radius: var(--radius, 25px);
     padding: 15px;
-    box-shadow: var(--shadow);
-    transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    border: 1px solid rgba(0,0,0,0.02);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    transition: 0.4s;
 }
 
-.card:hover {
-    transform: translateY(-10px);
-}
+.card:hover { transform: translateY(-10px); }
 
 .card-img {
-    width: 100%;
-    aspect-ratio: 1/1.2;
-    border-radius: 18px;
+    width: 100%; aspect-ratio: 1/1;
+    border-radius: calc(var(--radius) / 1.5);
     object-fit: cover;
-    background: #f1f5f9;
 }
 
-.card-info {
-    padding: 15px 5px;
-}
-
-.card-info h3 {
-    margin: 0;
-    font-size: 1.1rem;
-    color: var(--azul-noche);
-}
-
-.card-price {
-    display: block;
-    margin-top: 10px;
-    font-weight: 700;
-    font-size: 1.2rem;
-    color: var(--verde-boutique);
-}
-
-.btn-add {
-    width: 100%;
-    margin-top: 15px;
-    padding: 12px;
-    border-radius: 12px;
-    border: none;
-    background: var(--azul-noche);
-    color: white;
-    font-weight: 600;
-    cursor: pointer;
-    transition: 0.3s;
-}
-
-.btn-add:hover {
-    background: var(--naranja-siena);
-}
-
-@media (max-width: 768px) {
-    .hero { grid-template-columns: 1fr; height: auto; }
-    .hero-content h1 { font-size: 3rem; }
-    .nav-links { display: none; }
-}
+/* TEMAS ESPECÍFICOS */
+.tema-Todos { --bg-hero: var(--verde-sua); --radius: 40px; --text-hero: white; }
+.tema-Bebé { --bg-hero: #f7e8e8; --radius: 60px; --text-hero: #7c4a4a; }
+.tema-Niño { --bg-hero: #e8eff7; --radius: 20px; --text-hero: #2d4263; }
+.tema-Niña { --bg-hero: #f2e8f7; --radius: 40px; --text-hero: #603060; }
