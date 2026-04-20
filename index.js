@@ -3,6 +3,7 @@ const { useState, useEffect } = React;
 function App() {
     const [items, setItems] = useState([]);
     const [cat, setCat] = useState('Todos');
+    const [loading, setLoading] = useState(true);
 
     const _supabase = supabase.createClient(
         'https://hvnpkljyoocqdzwdptgt.supabase.co',
@@ -11,17 +12,22 @@ function App() {
 
     useEffect(() => {
         const loadData = async () => {
-            // Filtramos siempre por 'disponible' = true para que lo que quites en el admin desaparezca aquí
+            setLoading(true);
+            // Filtramos por disponibles. Asegúrate de tener activada la política SELECT para 'anon' en Supabase
             let q = _supabase.from('productos').select('*').eq('disponible', true);
             
             if (cat !== 'Todos') {
                 q = q.eq('categoria', cat);
-            } else {
-                q = q.in('categoria', ['Bebé', 'Niño', 'Niña']);
             }
             
-            const { data } = await q.order('created_at', { ascending: false });
-            setItems(data || []);
+            const { data, error } = await q.order('created_at', { ascending: false });
+            
+            if (error) {
+                console.error("Error cargando datos:", error.message);
+            } else {
+                setItems(data || []);
+            }
+            setLoading(false);
         };
         loadData();
     }, [cat]);
@@ -32,14 +38,23 @@ function App() {
     };
 
     return (
-        <div className={`app-container tema-${cat}`}>
+        <div className={`app-container theme-siwa`}>
+            {/* NAVEGACIÓN PROFESIONAL */}
             <nav className="nav-bar">
-                <div className="sua-logo">SUA</div>
+                <div className="logo-wrapper">
+                    <div className="siwa-brand">
+                        <span className="logo-symbol">@</span>
+                        <span className="logo-text">Siwá</span>
+                        <span className="logo-dot">.</span>
+                    </div>
+                    <small className="logo-tagline">KIDS BOUTIQUE</small>
+                </div>
+                
                 <div className="nav-links">
                     {['Todos', 'Bebé', 'Niño', 'Niña'].map(c => (
                         <button 
                             key={c} 
-                            className={cat === c ? 'active' : ''} 
+                            className={cat === c ? 'nav-btn active' : 'nav-btn'} 
                             onClick={() => setCat(c)}
                         >
                             {c}
@@ -48,100 +63,112 @@ function App() {
                 </div>
             </nav>
 
-            <header className="hero">
-                <h1>{cat === 'Todos' ? 'Tesoro Infantil' : cat}</h1>
-                <p style={{fontSize: '0.85rem', opacity: 0.7, margin: '10px 0 0'}}>
-                    Moda importada seleccionada para tu familia.
-                </p>
+            {/* HERO DINÁMICO */}
+            <header className="hero-section">
+                <div className="hero-content">
+                    <span className="hero-label">Colección 2026</span>
+                    <h1>{cat === 'Todos' ? 'Historias que se visten' : `Especial ${cat}`}</h1>
+                    <p>Moda importada con la esencia del viento y la frescura de nuestra tierra.</p>
+                </div>
             </header>
 
-            <main className="grid">
-                {items.map(item => (
-                    <article key={item.id} className="card" style={{ position: 'relative' }}>
-                        {/* Badge de Oferta flotante si tiene descuento */}
-                        {item.tiene_descuento && (
-                            <div style={{
-                                position: 'absolute', top: '10px', right: '10px',
-                                background: 'var(--naranja-sua)', color: 'white',
-                                padding: '4px 8px', borderRadius: '8px', fontSize: '0.7rem',
-                                fontWeight: '700', zIndex: 2
-                            }}>
-                                -{item.porcentaje_descuento}%
-                            </div>
-                        )}
-                        
-                        <img src={item.imagen_url} className="card-img" alt={item.nombre} />
-                        
-                        <div style={{padding: '10px 5px'}}>
-                            <h3 style={{fontSize: '1rem', margin: '5px 0', fontWeight: '500'}}>{item.nombre}</h3>
-                            
-                            {/* Lógica de Precios con Descuento */}
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                                {item.tiene_descuento ? (
-                                    <>
-                                        <span style={{ color: 'var(--naranja-sua)', fontWeight: '700', fontSize: '1.1rem' }}>
-                                            ₡{parseInt(item.precio_oferta).toLocaleString()}
-                                        </span>
-                                        <span style={{ textDecoration: 'line-through', opacity: 0.4, fontSize: '0.85rem' }}>
-                                            ₡{parseInt(item.precio).toLocaleString()}
-                                        </span>
-                                    </>
-                                ) : (
-                                    <span style={{ color: 'var(--naranja-sua)', fontWeight: '700' }}>
-                                        ₡{parseInt(item.precio).toLocaleString()}
-                                    </span>
-                                )}
-                            </div>
-
-                            <button 
-                                onClick={() => window.open(`https://wa.me/50688888888?text=Me interesa este producto de la web: ${item.nombre}`)}
-                                style={{
-                                    width: '100%', marginTop: '12px', padding: '10px',
-                                    background: 'var(--verde-boutique)', color: 'white',
-                                    border: 'none', borderRadius: '20px', cursor: 'pointer', fontSize: '0.8rem',
-                                    transition: '0.3s'
-                                }}
-                            >
-                                WhatsApp
-                            </button>
-                        </div>
-                    </article>
-                ))}
+            {/* GRID DE PRODUCTOS */}
+            <main className="main-content">
+                {loading ? (
+                    <div className="loader">Cargando tesoros...</div>
+                ) : (
+                    <div className="product-grid">
+                        {items.map(item => (
+                            <article key={item.id} className="product-card">
+                                <div className="image-wrapper">
+                                    {item.tiene_descuento && (
+                                        <span className="promo-badge">-{item.porcentaje_descuento}%</span>
+                                    )}
+                                    <img src={item.imagen_url} alt={item.nombre} loading="lazy" />
+                                </div>
+                                
+                                <div className="product-info">
+                                    <span className="product-cat">{item.categoria}</span>
+                                    <h3>{item.nombre}</h3>
+                                    <div className="product-price">
+                                        {item.tiene_descuento ? (
+                                            <>
+                                                <span className="current-price">₡{parseInt(item.precio_oferta).toLocaleString()}</span>
+                                                <span className="old-price">₡{parseInt(item.precio).toLocaleString()}</span>
+                                            </>
+                                        ) : (
+                                            <span className="current-price">₡{parseInt(item.precio).toLocaleString()}</span>
+                                        )}
+                                    </div>
+                                    <button 
+                                        className="wa-button"
+                                        onClick={() => window.open(`https://wa.me/50688888888?text=Hola Siwá! Me interesa: ${item.nombre}`)}
+                                    >
+                                        <i className="wa-icon"></i> Consultar Disponibilidad
+                                    </button>
+                                </div>
+                            </article>
+                        ))}
+                    </div>
+                )}
             </main>
 
-            <footer className="footer">
-                <div className="footer-content">
-                    <div className="footer-brand">
-                        <div className="sua-logo">SUA</div>
-                        <p className="footer-location">SUA KIDS / Pococí, Limón</p>
+            {/* SECCIÓN NOSOTROS / SIGNIFICADO */}
+            <section className="about-section">
+                <div className="about-container">
+                    <div className="about-visual">
+                        <div className="floating-kite">◊</div>
+                    </div>
+                    <div className="about-text">
+                        <h2>Nuestra Historia</h2>
+                        <p>
+                            En la lengua ancestral <strong>Bribri</strong>, <strong>Siwá</strong> es el viento, el soplo de vida y las historias que viajan con él. 
+                            Nuestra boutique en Pococí nace para ser ese viento fresco que trae lo mejor del mundo para vestir los momentos más importantes de tus hijos.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            {/* FOOTER PROFESIONAL Y ADAPTABLE */}
+            <footer className="main-footer">
+                <div className="footer-top">
+                    <div className="footer-column brand-col">
+                        <div className="siwa-logo-footer">Siwá</div>
+                        <p>Moda infantil con propósito y raíz. Enviamos a todo el país desde Guápiles.</p>
+                        <div className="social-icons">
+                            <button className="social-btn">IG</button>
+                            <button className="social-btn">FB</button>
+                        </div>
                     </div>
 
-                    <div className="footer-links-wrapper">
-                        <div className="footer-links">
-                            <h4>Colecciones</h4>
-                            <ul>
-                                {['Bebé', 'Niño', 'Niña'].map(c => (
-                                    <li key={c}>
-                                        <button onClick={() => navTo(c)}>{c}</button>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
+                    <div className="footer-column">
+                        <h4>Categorías</h4>
+                        <ul>
+                            {['Bebé', 'Niño', 'Niña'].map(c => (
+                                <li key={c} onClick={() => navTo(c)}>{c}</li>
+                            ))}
+                        </ul>
+                    </div>
 
-                        <div className="footer-links">
-                            <h4>Contacto</h4>
-                            <ul>
-                                <li><button onClick={() => window.open('https://wa.me/50688888888')}>WhatsApp</button></li>
-                                <li><button>Instagram</button></li>
-                            </ul>
-                        </div>
+                    <div className="footer-column">
+                        <h4>Ayuda</h4>
+                        <ul>
+                            <li>Guía de Tallas</li>
+                            <li>Envíos</li>
+                            <li>Términos</li>
+                        </ul>
+                    </div>
+
+                    <div className="footer-column">
+                        <h4>Ubicación</h4>
+                        <p>Guápiles, Pococí<br/>Limón, Costa Rica</p>
                     </div>
                 </div>
 
                 <div className="footer-bottom">
-                    <div>© 2026 SUA Boutique</div>
-                    <div className="designer-credit">
-                        DISEÑADO POR <span style={{color: 'white', fontWeight: '700'}}>MONTZUCR</span>
+                    <div className="bottom-container">
+                        <p>© 2026 Siwá Boutique. Todos los derechos reservados.</p>
+                        <p className="credit">By <strong>MONTZU</strong></p>
                     </div>
                 </div>
             </footer>
