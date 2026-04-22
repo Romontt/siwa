@@ -150,7 +150,7 @@ function App() {
                                     </div>
                                     <button 
                                         className="wa-button"
-                                        onClick={() => window.open(`https://wa.me/50688888888?text=Hola Siwá! Me interesa: ${item.nombre}`)}
+                                        onClick={() => window.open(`https://wa.me/50683337497?text=Hola Siwá! Me interesa: ${item.nombre}`)}
                                         style={{ 
                                             width: '100%', 
                                             padding: '8px', 
