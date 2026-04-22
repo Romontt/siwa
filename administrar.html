@@ -80,7 +80,6 @@
             };
 
             const actualizarProducto = async (id, camposOriginales) => {
-                // Cálculo de oferta en tiempo real
                 const nuevoPrecioOferta = camposOriginales.tiene_descuento 
                     ? camposOriginales.precio - (camposOriginales.precio * (camposOriginales.porcentaje_descuento / 100))
                     : null;
@@ -138,10 +137,54 @@
 
         function ProductRow({ producto, onSave, onDelete }) {
             const [edit, setEdit] = useState({...producto});
+            const [subiendo, setSubiendo] = useState(false);
+
+            const cambiarImagen = async (e) => {
+                const archivo = e.target.files[0];
+                if (!archivo) return;
+
+                try {
+                    setSubiendo(true);
+
+                    // 1. Intentar borrar la imagen vieja del bucket si existe
+                    if (producto.imagen_url) {
+                        const urlParts = producto.imagen_url.split('/');
+                        const oldFileName = urlParts[urlParts.length - 1];
+                        await _supabase.storage.from('productos').remove([`productos/${oldFileName}`]);
+                    }
+
+                    // 2. Subir la nueva imagen
+                    const nombreArchivo = `${Date.now()}_${archivo.name}`;
+                    const { error: uploadError } = await _supabase.storage
+                        .from('productos')
+                        .upload(`productos/${nombreArchivo}`, archivo);
+
+                    if (uploadError) throw uploadError;
+
+                    // 3. Obtener URL pública
+                    const { data: { publicUrl } } = _supabase.storage
+                        .from('productos')
+                        .getPublicUrl(`productos/${nombreArchivo}`);
+
+                    setEdit({...edit, imagen_url: publicUrl});
+                    alert("Imagen lista para guardar.");
+                } catch (error) {
+                    alert("Error con la imagen: " + error.message);
+                } finally {
+                    setSubiendo(false);
+                }
+            };
 
             return (
                 <div className="product-edit-card">
-                    <img src={producto.imagen_url} className="prod-img" />
+                    <div style={{textAlign: 'center'}}>
+                        <img src={edit.imagen_url} className="prod-img" style={{opacity: subiendo ? 0.5 : 1}} />
+                        <label style={{display: 'block', fontSize: '0.6rem', color: 'var(--naranja)', marginTop: '8px', cursor: 'pointer'}}>
+                            {subiendo ? '...' : 'CAMBIAR'}
+                            <input type="file" hidden accept="image/*" onChange={cambiarImagen} disabled={subiendo} />
+                        </label>
+                    </div>
+
                     <div className="prod-info">
                         <h3 className="prod-title">{producto.nombre}</h3>
                         
@@ -173,7 +216,9 @@
                             </div>
                         </div>
 
-                        <button className="btn-save" onClick={() => onSave(edit)}>Guardar Cambios</button>
+                        <button className="btn-save" onClick={() => onSave(edit)} disabled={subiendo}>
+                            {subiendo ? 'Subiendo...' : 'Guardar Cambios'}
+                        </button>
                         <center><button className="btn-delete" onClick={onDelete}>Eliminar prenda</button></center>
                     </div>
                 </div>
