@@ -36,11 +36,14 @@ function App() {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
+    // Detectar si es móvil para el grid
+    const isMobile = window.innerWidth < 768;
+
     return (
         <div className={`app-container theme-siwa`}>
-            {/* NAVEGACIÓN PROFESIONAL */}
-            <nav className="nav-bar">
-                <div className="logo-wrapper">
+            {/* NAVEGACIÓN AJUSTADA */}
+            <nav className="nav-bar" style={{ padding: '10px 20px' }}>
+                <div className="logo-wrapper" style={{ transform: isMobile ? 'scale(1)' : 'scale(0.85)', transformOrigin: 'left' }}>
                     <div className="siwa-brand">
                         <span className="logo-symbol">@</span>
                         <span className="logo-text">Siwá</span>
@@ -49,12 +52,13 @@ function App() {
                     <small className="logo-tagline">TIENDA VIRTUAL INFANTIL</small>
                 </div>
                 
-                <div className="nav-links">
+                <div className="nav-links" style={{ gap: isMobile ? '10px' : '20px' }}>
                     {['Todos', 'Bebé', 'Niño', 'Niña'].map(c => (
                         <button 
                             key={c} 
                             className={cat === c ? 'nav-btn active' : 'nav-btn'} 
                             onClick={() => setCat(c)}
+                            style={{ fontSize: isMobile ? '0.9rem' : '0.85rem', padding: isMobile ? '8px 12px' : '6px 15px' }}
                         >
                             {c}
                         </button>
@@ -71,15 +75,15 @@ function App() {
                 </div>
             </header>
 
-            {/* GRID DE PRODUCTOS: 2 COLUMNAS SIEMPRE */}
-            <main className="main-content" style={{ padding: '15px 8px' }}>
+            {/* GRID DE PRODUCTOS: 2 EN MÓVIL, 4 EN PC */}
+            <main className="main-content" style={{ padding: isMobile ? '15px 8px' : '40px 20px' }}>
                 {loading ? (
                     <div className="loader">Cargando tesoros...</div>
                 ) : (
                     <div className="product-grid" style={{ 
                         display: 'grid', 
-                        gridTemplateColumns: 'repeat(2, 1fr)', 
-                        gap: '12px',
+                        gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', 
+                        gap: isMobile ? '12px' : '30px',
                         maxWidth: '1200px',
                         margin: '0 auto'
                     }}>
@@ -111,7 +115,7 @@ function App() {
                                 
                                 <div className="product-info" style={{ padding: '10px 2px' }}>
                                     <span className="product-cat" style={{ fontSize: '0.7rem' }}>{item.categoria}</span>
-                                    <h3 style={{ fontSize: '0.95rem', margin: '4px 0', lineHeight: '1.2' }}>{item.nombre}</h3>
+                                    <h3 style={{ fontSize: isMobile ? '0.95rem' : '1.1rem', margin: '4px 0', lineHeight: '1.2' }}>{item.nombre}</h3>
                                     <div className="product-price" style={{ marginBottom: '10px' }}>
                                         {item.tiene_descuento ? (
                                             <>
