@@ -13,7 +13,6 @@ function App() {
     useEffect(() => {
         const loadData = async () => {
             setLoading(true);
-            // Filtramos por disponibles. Asegúrate de tener activada la política SELECT para 'anon' en Supabase
             let q = _supabase.from('productos').select('*').eq('disponible', true);
             
             if (cat !== 'Todos') {
@@ -72,39 +71,58 @@ function App() {
                 </div>
             </header>
 
-            {/* GRID DE PRODUCTOS */}
-            <main className="main-content">
+            {/* GRID DE PRODUCTOS AJUSTADO PARA IMÁGENES GRANDES */}
+            <main className="main-content" style={{ padding: '20px 10px' }}>
                 {loading ? (
                     <div className="loader">Cargando tesoros...</div>
                 ) : (
-                    <div className="product-grid">
+                    <div className="product-grid" style={{ 
+                        display: 'grid', 
+                        gridTemplateColumns: window.innerWidth < 768 ? '1fr' : 'repeat(2, 1fr)', 
+                        gap: '25px',
+                        maxWidth: '1200px',
+                        margin: '0 auto'
+                    }}>
                         {items.map(item => (
-                            <article key={item.id} className="product-card">
-                                <div className="image-wrapper">
+                            <article key={item.id} className="product-card" style={{ background: 'transparent' }}>
+                                <div className="image-wrapper" style={{ 
+                                    width: '100%', 
+                                    aspectRatio: '4 / 5', 
+                                    borderRadius: '24px', 
+                                    overflow: 'hidden',
+                                    position: 'relative',
+                                    boxShadow: '0 10px 30px rgba(0,0,0,0.1)'
+                                }}>
                                     {item.tiene_descuento && (
-                                        <span className="promo-badge">-{item.porcentaje_descuento}%</span>
+                                        <span className="promo-badge" style={{ position: 'absolute', zIndex: 2 }}>-{item.porcentaje_descuento}%</span>
                                     )}
-                                    <img src={item.imagen_url} alt={item.nombre} loading="lazy" />
+                                    <img 
+                                        src={item.imagen_url} 
+                                        alt={item.nombre} 
+                                        loading="lazy" 
+                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                    />
                                 </div>
                                 
-                                <div className="product-info">
+                                <div className="product-info" style={{ padding: '15px 5px' }}>
                                     <span className="product-cat">{item.categoria}</span>
-                                    <h3>{item.nombre}</h3>
-                                    <div className="product-price">
+                                    <h3 style={{ fontSize: '1.4rem', margin: '8px 0' }}>{item.nombre}</h3>
+                                    <div className="product-price" style={{ marginBottom: '15px' }}>
                                         {item.tiene_descuento ? (
                                             <>
-                                                <span className="current-price">₡{parseInt(item.precio_oferta).toLocaleString()}</span>
-                                                <span className="old-price">₡{parseInt(item.precio).toLocaleString()}</span>
+                                                <span className="current-price" style={{ fontSize: '1.3rem', fontWeight: '700' }}>₡{parseInt(item.precio_offer || item.precio_oferta).toLocaleString()}</span>
+                                                <span className="old-price" style={{ marginLeft: '10px', opacity: 0.5, textDecoration: 'line-through' }}>₡{parseInt(item.precio).toLocaleString()}</span>
                                             </>
                                         ) : (
-                                            <span className="current-price">₡{parseInt(item.precio).toLocaleString()}</span>
+                                            <span className="current-price" style={{ fontSize: '1.3rem', fontWeight: '700' }}>₡{parseInt(item.precio).toLocaleString()}</span>
                                         )}
                                     </div>
                                     <button 
                                         className="wa-button"
                                         onClick={() => window.open(`https://wa.me/50688888888?text=Hola Siwá! Me interesa: ${item.nombre}`)}
+                                        style={{ width: '100%', padding: '15px', borderRadius: '15px', fontWeight: 'bold' }}
                                     >
-                                        <i className="wa-icon"></i> Consultar Disponibilidad
+                                        Consultar Disponibilidad
                                     </button>
                                 </div>
                             </article>
@@ -113,7 +131,7 @@ function App() {
                 )}
             </main>
 
-            {/* SECCIÓN NOSOTROS / SIGNIFICADO */}
+            {/* SECCIÓN NOSOTROS */}
             <section className="about-section">
                 <div className="about-container">
                     <div className="about-visual">
@@ -129,7 +147,7 @@ function App() {
                 </div>
             </section>
 
-            {/* FOOTER PROFESIONAL Y ADAPTABLE */}
+            {/* FOOTER */}
             <footer className="main-footer">
                 <div className="footer-top">
                     <div className="footer-column brand-col">
@@ -145,7 +163,7 @@ function App() {
                         <h4>Categorías</h4>
                         <ul>
                             {['Bebé', 'Niño', 'Niña'].map(c => (
-                                <li key={c} onClick={() => navTo(c)}>{c}</li>
+                                <li key={c} onClick={() => navTo(c)} style={{ cursor: 'pointer' }}>{c}</li>
                             ))}
                         </ul>
                     </div>
