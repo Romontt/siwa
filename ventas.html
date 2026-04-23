@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control Financiero | Siwa Boutique</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root { 
+            --azul-navy: #1a2a3a;
+            --verde-fino: #2d5a4c;
+            --naranja-accent: #e67e22;
+            --bg-claro: #f4f7f6;
+            --blanco: #ffffff;
+            --texto: #2c3e50;
+            --danger: #d63031;
+            --subtle: #f8f9fa;
+        }
+
+        body { font-family: 'Outfit', sans-serif; background: var(--bg-claro); margin: 0; padding: 0; color: var(--texto); }
+        
+        header {
+            background: var(--azul-navy);
+            color: white;
+            padding: 15px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .container { padding: 30px 5%; max-width: 1300px; margin: 0 auto; }
+
+        /* Dashboard de Métricas */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            border-bottom: 4px solid #ddd;
+        }
+
+        .stat-card h3 { margin: 0; font-size: 0.85rem; color: #7f8c8d; text-transform: uppercase; letter-spacing: 1px; }
+        .stat-card p { margin: 8px 0 0; font-size: 1.6rem; font-weight: 600; }
+        
+        .card-total { border-color: var(--azul-navy); }
+        .card-iva { border-color: var(--naranja-accent); }
+        .card-profit { border-color: var(--verde-fino); color: var(--verde-fino); }
+        .card-pending { border-color: #f1c40f; }
+
+        /* Tabla Estilizada */
+        .table-container {
+            background: white;
+            border-radius: 25px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+
+        table { width: 100%; border-collapse: collapse; min-width: 800px; }
+        thead { background: var(--subtle); }
+        th { padding: 18px; text-align: left; color: #7f8c8d; font-size: 0.9rem; }
+        td { padding: 18px; border-bottom: 1px solid #f1f1f1; font-size: 0.95rem; }
+
+        /* Estados */
+        .badge { padding: 5px 12px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
+        .badge-pending { background: #fff3e0; color: #e67e22; }
+        .badge-completed { background: #e8f5e9; color: #2d5a4c; }
+
+        /* Botones */
+        .btn-confirm { 
+            background: var(--verde-fino); color: white; border: none; 
+            padding: 8px 16px; border-radius: 10px; cursor: pointer; font-weight: 600;
+        }
+        .btn-confirm:hover { transform: scale(1.05); background: #1e3d33; }
+
+        .btn-back { color: white; text-decoration: none; font-size: 0.9rem; display: flex; align-items: center; gap: 5px; }
+        
+        .txt-small { font-size: 0.75rem; color: #95a5a6; display: block; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        const _supabase = supabase.createClient('https://hvnpkljyoocqdzwdptgt.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2bnBrbGp5b29jcWR6d2RwdGd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2MTAxMTQsImV4cCI6MjA5MjE4NjExNH0.-pq3iVzqJsJCyGNXkFPlHSIQeBTrr7i7ptsY6FYjJZ0');
+
+        function App() {
+            const [sales, setSales] = useState([]);
+            const [metrics, setMetrics] = useState({ total: 0, iva: 0, profit: 0, pending: 0 });
+
+            useEffect(() => { fetchSales(); }, []);
+
+            async function fetchSales() {
+                const { data } = await _supabase.from('sales').select('*').order('created_at', { ascending: false });
+                if (data) {
+                    setSales(data);
+                    calculateMetrics(data);
+                }
+            }
+
+            function calculateMetrics(allSales) {
+                const completed = allSales.filter(s => s.status === 'completed');
+                
+                // El total ya incluye IVA, lo desglosamos para Doris
+                const totalVentas = completed.reduce((acc, s) => acc + Number(s.total_amount), 0);
+                const totalIVA = totalVentas - (totalVentas / 1.13); // Cálculo del 13% incluido
+                const gananciaBruta = completed.reduce((acc, s) => acc + Number(s.total_profit), 0);
+                
+                // Ganancia Neta sugerida (restando IVA de la ganancia si Doris asume el costo)
+                // O simplemente mostrar la ganancia configurada en sales_items
+                
+                setMetrics({
+                    total: totalVentas,
+                    iva: totalIVA,
+                    profit: gananciaBruta,
+                    pending: allSales.filter(s => s.status === 'pending').length
+                });
+            }
+
+            async function confirmSale(id) {
+                if(!confirm("¿Deseas confirmar esta venta? Esto descontará el inventario.")) return;
+                const { error } = await _supabase.rpc('confirm_sale', { p_sale_id: id });
+                if (error) alert("Error al confirmar: " + error.message);
+                else fetchSales();
+            }
+
+            return (
+                <div>
+                    <header>
+                        <a href="admin.html" className="btn-back"><span>←</span> Panel Principal</a>
+                        <h1 style={{fontFamily: 'Playfair Display', margin: 0, fontSize: '1.2rem'}}>SIWA FINANCE</h1>
+                        <div style={{width: '100px'}}></div>
+                    </header>
+
+                    <main className="container">
+                        <div className="stats-grid">
+                            <div className="stat-card card-total">
+                                <h3>Ingresos Totales</h3>
+                                <p>₡{metrics.total.toLocaleString('es-CR')}</p>
+                                <span className="txt-small">Ventas confirmadas (IVA incl.)</span>
+                            </div>
+                            <div className="stat-card card-iva">
+                                <h3>IVA por Reservar</h3>
+                                <p>₡{Math.round(metrics.iva).toLocaleString('es-CR')}</p>
+                                <span className="txt-small">Monto del 13% recolectado</span>
+                            </div>
+                            <div className="stat-card card-profit">
+                                <h3>Ganancia Bruta</h3>
+                                <p>₡{metrics.profit.toLocaleString('es-CR')}</p>
+                                <span className="txt-small">Venta menos costo de prenda</span>
+                            </div>
+                            <div className="stat-card card-pending">
+                                <h3>Por Confirmar</h3>
+                                <p>{metrics.pending}</p>
+                                <span className="txt-small">Pedidos en espera</span>
+                            </div>
+                        </div>
+
+                        <div className="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Fecha y Cliente</th>
+                                        <th>Desglose (₡)</th>
+                                        <th>Total Cobrado</th>
+                                        <th>Estado</th>
+                                        <th>Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {sales.map(sale => {
+                                        const subtotal = sale.total_amount / 1.13;
+                                        const iva = sale.total_amount - subtotal;
+                                        return (
+                                            <tr key={sale.id}>
+                                                <td>
+                                                    <strong>{sale.customer_name || 'Pedido Web'}</strong>
+                                                    <span className="txt-small">{new Date(sale.created_at).toLocaleDateString()}</span>
+                                                </td>
+                                                <td>
+                                                    <div className="txt-small">Base: ₡{Math.round(subtotal).toLocaleString()}</div>
+                                                    <div className="txt-small">IVA (13%): ₡{Math.round(iva).toLocaleString()}</div>
+                                                </td>
+                                                <td style={{fontWeight: '600', color: var(--azul-navy)}}>
+                                                    ₡{Number(sale.total_amount).toLocaleString()}
+                                                </td>
+                                                <td>
+                                                    <span className={`badge badge-${sale.status}`}>
+                                                        {sale.status === 'pending' ? 'Pendiente' : 'Pagado'}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    {sale.status === 'pending' ? (
+                                                        <button className="btn-confirm" onClick={() => confirmSale(sale.id)}>
+                                                            Confirmar Pago
+                                                        </button>
+                                                    ) : (
+                                                        <span style={{color: '#bdc3c7', fontSize: '0.8rem'}}>✓ Procesada</span>
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        )
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
+                    </main>
+                </div>
+            );
+        }
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
+</body>
+</html>
