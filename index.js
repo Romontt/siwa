@@ -17,7 +17,7 @@ function App() {
 
     const _supabase = supabase.createClient(
         'https://hvnpkljyoocqdzwdptgt.supabase.co',
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2bnBrbGp5b29jcWR6d2RwdGd0Iiwicm9sZSI6Imh2bnBrbGp5b29jcWR6d2RwdGd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2MTAxMTQsImV4cCI6MjA5MjE4NjExNH0.-pq3iVzqJsJCyGNXkFPlHSIQeBTrr7i7ptsY6FYjJZ0'
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2bnBrbGp5b29jcWR6d2RwdGd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2MTAxMTQsImV4cCI6MjA5MjE4NjExNH0.-pq3iVzqJsJCyGNXkFPlHSIQeBTrr7i7ptsY6FYjJZ0'
     );
 
     const sessionId = (() => {
@@ -57,24 +57,27 @@ function App() {
     useEffect(() => {
         const loadData = async () => {
             setLoading(true);
-            let q = _supabase.from('productos').select('*').eq('disponible', true);
-            if (cat !== 'Todos') {
-                q = q.eq('categoria', cat);
-            }
-            const { data, error } = await q.order('created_at', { ascending: false });
-            if (error) {
-                console.error("Error cargando datos:", error.message);
-            } else {
+            try {
+                let q = _supabase.from('productos').select('*').eq('disponible', true);
+                if (cat !== 'Todos') {
+                    q = q.eq('categoria', cat);
+                }
+                const { data, error } = await q.order('created_at', { ascending: false });
+                if (error) throw error;
                 setItems(data || []);
+            } catch (error) {
+                console.error("Error cargando datos:", error.message);
+            } finally {
+                setLoading(false);
             }
-            setLoading(false);
         };
         loadData();
     }, [cat]);
 
     const addToCart = (product) => {
-        const countInCart = cart.filter(item => item.id === product.id).length;
-        if (countInCart === 0) {
+        const isAlreadyInCart = cart.some(item => item.id === product.id);
+        // Solo permite agregar si hay stock y no está ya en el carrito
+        if (!isAlreadyInCart && product.stock > 0) {
             setCart([...cart, { ...product, cartId: Date.now() + Math.random() }]);
             trackEvent('user_clicks', 
                 { element_id: 'btn-add-to-cart', click_text: `Añadir: ${product.nombre}`, page_path: window.location.pathname },
@@ -104,52 +107,46 @@ function App() {
     }, 0);
 
     const enviarPedidoWhatsApp = async () => {
-        // 1. Guardar en la tabla "ventas" para que aparezca en ventas.html como Pendiente
+        if (cart.length === 0) return;
+
         try {
+            // 1. Registrar la venta en Supabase
             const { error } = await _supabase.from('ventas').insert([
                 {
-                    productos: cart,
+                    productos: cart.map(item => ({ id: item.id, nombre: item.nombre, precio: item.tiene_descuento ? (item.precio_offer || item.precio_oferta) : item.precio })),
                     total: cartTotal,
                     estado: 'pendiente',
                     session_id: sessionId
                 }
             ]);
+
             if (error) throw error;
+
+            // 2. Tracking de Checkout
+            trackEvent('user_clicks', 
+                { element_id: 'btn-confirm-whatsapp', click_text: 'Confirmar Pedido WhatsApp', page_path: window.location.pathname },
+                'begin_checkout',
+                { currency: 'CRC', value: cartTotal, items: cart.map(i => ({ item_id: i.id, item_name: i.nombre })) }
+            );
+
+            // 3. Generar mensaje de WhatsApp
+            const mensajeBase = `¡Hola Siwá! 🌬️ Me interesa realizar el siguiente pedido:%0A%0A`;
+            const lista = cart.map(item => {
+                const precio = parseInt(item.tiene_descuento ? (item.precio_offer || item.precio_oferta) : item.precio);
+                return `- 1x ${item.nombre} (₡${precio.toLocaleString()})`;
+            }).join('%0A');
+
+            const totalTexto = `%0A%0A*Total: ₡${cartTotal.toLocaleString()}*%0A_Envío gratis en Guápiles Centro_`;
+            
+            // 4. Abrir WhatsApp y resetear
+            window.open(`https://wa.me/50683337497?text=${mensajeBase}${lista}${totalTexto}`, '_blank');
+            setCart([]);
+            setIsCartOpen(false);
+
         } catch (err) {
-            console.error("Error al registrar venta:", err);
-            alert("Error al registrar la venta en el sistema.");
-            return; // No abrimos WhatsApp si no se pudo registrar
+            console.error("Error en el proceso de compra:", err);
+            alert("Hubo un problema al procesar tu pedido. Por favor, intenta de nuevo.");
         }
-
-        // 2. Lógica de Seguimiento
-        trackEvent('user_clicks', 
-            { element_id: 'btn-confirm-whatsapp', click_text: 'Confirmar Pedido WhatsApp', page_path: window.location.pathname },
-            'begin_checkout',
-            { currency: 'CRC', value: cartTotal, items: cart.map(i => ({ item_id: i.id, item_name: i.nombre })) }
-        );
-
-        // 3. Preparar mensaje de WhatsApp
-        const mensajeBase = `¡Hola Siwá! 🌬️ Me interesa realizar el siguiente pedido:%0A%0A`;
-        const itemsResumen = cart.reduce((acc, item) => {
-            const precio = parseInt(item.tiene_descuento ? (item.precio_offer || item.precio_oferta) : item.precio);
-            const key = `${item.nombre}-${precio}`;
-            if (!acc[key]) {
-                acc[key] = { nombre: item.nombre, precio, cantidad: 0 };
-            }
-            acc[key].cantidad += 1;
-            return acc;
-        }, {});
-
-        const lista = Object.values(itemsResumen).map(i => 
-            `- ${i.cantidad}x ${i.nombre} (₡${i.precio.toLocaleString()})`
-        ).join('%0A');
-
-        const totalTexto = `%0A%0A*Total: ₡${cartTotal.toLocaleString()}*%0A_Envío gratis en Guápiles Centro_`;
-        
-        // 4. Abrir WhatsApp, limpiar carrito y cerrar modal
-        window.open(`https://wa.me/50683337497?text=${mensajeBase}${lista}${totalTexto}`);
-        setCart([]);
-        setIsCartOpen(false);
     };
 
     const navTo = (nuevaCat) => {
@@ -279,7 +276,8 @@ function App() {
                     }}>
                         {items.map(item => {
                             const isAdded = cart.some(c => c.id === item.id);
-                            const isBlocked = item.stock <= 0 || isAdded;
+                            const isOutOfStock = item.stock <= 0;
+                            const isBlocked = isOutOfStock || isAdded;
                             
                             return (
                                 <article key={item.id} className="product-card" style={{ display: 'flex', flexDirection: 'column' }}>
@@ -310,7 +308,7 @@ function App() {
                                                 left: '10px', top: '10px'
                                             }}>-{item.porcentaje_descuento}%</span>
                                         )}
-                                        {item.stock === 1 && (
+                                        {item.stock === 1 && !isOutOfStock && (
                                             <span style={{
                                                 position: 'absolute', bottom: '10px', right: '10px',
                                                 background: 'rgba(255,255,255,0.9)', padding: '4px 8px',
@@ -322,7 +320,7 @@ function App() {
                                             src={item.imagen_url} 
                                             alt={item.nombre} 
                                             loading="lazy" 
-                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                            style={{ width: '100%', height: '100%', objectFit: 'cover', filter: isOutOfStock ? 'grayscale(1)' : 'none' }}
                                         />
                                     </div>
                                     
@@ -368,14 +366,14 @@ function App() {
                                                 borderRadius: '12px', 
                                                 fontSize: '0.8rem',
                                                 fontWeight: '600',
-                                                background: item.stock <= 0 ? '#ccc' : (isAdded ? '#888' : 'var(--verde-siwa)'), 
+                                                background: isOutOfStock ? '#ccc' : (isAdded ? '#888' : 'var(--verde-siwa)'), 
                                                 color: 'white', 
                                                 border: 'none', 
                                                 cursor: isBlocked ? 'default' : 'pointer',
                                                 marginTop: 'auto'
                                             }}
                                         >
-                                            {item.stock <= 0 ? 'Sin stock disponible' : (isAdded ? 'Producto ya agregado al carrito' : 'Añadir al carrito')}
+                                            {isOutOfStock ? 'Agotado' : (isAdded ? 'En el carrito' : 'Añadir al carrito')}
                                         </button>
                                     </div>
                                 </article>
