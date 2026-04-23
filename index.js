@@ -298,7 +298,8 @@ function App() {
                     <div className="about-text">
                         <h2>Nuestra Historia</h2>
                         <p>
-                            En la lengua ancestral <strong>Bribri</strong>, <strong>Siwá</strong> es el viento... Enviamos a todo el país desde Guápiles.
+                            En la lengua ancestral <strong>Bribri</strong>, <strong>Siwá</strong> es el viento, el soplo de vida y las historias que viajan con él. 
+                            Nuestra tienda en Guápiles nace para ser ese viento fresco que trae lo mejor del mundo para vestir los momentos más importantes de tus hijos.
                         </p>
                     </div>
                 </div>
@@ -315,8 +316,19 @@ function App() {
                         <ul>{['Bebé', 'Niño', 'Niña'].map(c => <li key={c} onClick={() => navTo(c)} style={{ cursor: 'pointer' }}>{c}</li>)}</ul>
                     </div>
                     <div className="footer-column">
-                        <h4>Ayuda</h4>
-                        <ul><li>Guía de Tallas</li><li>Envíos</li><li>Términos</li></ul>
+                        <h4>Envíos</h4>
+                        <p style={{ fontSize: '0.85rem', lineHeight: '1.5' }}>
+                            • <strong>Guápiles Centro:</strong> Envío totalmente gratis.<br/>
+                            • <strong>Fuera de Guápiles:</strong> El costo se validará al momento de procesar tu pedido.
+                        </p>
+                    </div>
+                    <div className="footer-column">
+                        <h4>Términos</h4>
+                        <ul style={{ fontSize: '0.8rem', opacity: 0.8 }}>
+                            <li>• Cambios por defectos en 48h.</li>
+                            <li>• Apartados válidos por 15 días.</li>
+                            <li>• Ofertas no aplican para cambios.</li>
+                        </ul>
                     </div>
                     <div className="footer-column">
                         <h4>Ubicación</h4>
