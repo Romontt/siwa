@@ -14,7 +14,8 @@
             --azul-navy: #1a2a3a;
             --verde-fino: #2d5a4c;
             --naranja-accent: #e67e22;
-            --bg-claro: #f4f7f6;
+            /* Fondo un poco más oscuro y cálido, tipo arena suave */
+            --bg-calido: #eceee9; 
             --blanco: #ffffff;
             --texto: #2c3e50;
             --texto-suave: #7f8c8d;
@@ -23,7 +24,7 @@
         
         body { 
             font-family: 'Outfit', sans-serif; 
-            background: var(--bg-claro); 
+            background: var(--bg-calido); 
             margin: 0; 
             color: var(--texto); 
             min-height: 100vh; 
@@ -42,27 +43,26 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
 
-        .btn-back { text-decoration: none; color: white; font-size: 0.9rem; display: flex; align-items: center; gap: 8px; }
+        .btn-back { text-decoration: none; color: white; font-size: 0.9rem; font-weight: 600; }
 
-        .container { max-width: 1300px; margin: 30px auto; padding: 0 5%; }
+        .container { max-width: 1400px; margin: 30px auto; padding: 0 4%; }
         
         .welcome-header { margin-bottom: 30px; text-align: center; }
-        .welcome-header h2 { font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--azul-navy); margin-bottom: 5px; }
+        .welcome-header h2 { font-family: 'Playfair Display', serif; font-size: 2.2rem; color: var(--azul-navy); margin-bottom: 5px; }
 
-        /* Pestañas Modernas */
         .tabs { display: flex; gap: 15px; margin-bottom: 35px; justify-content: center; }
         .tab-btn { 
-            padding: 12px 35px; border-radius: 15px; border: 2px solid transparent;
+            padding: 12px 35px; border-radius: 15px; border: none;
             background: var(--blanco); color: var(--texto-suave); cursor: pointer; 
             transition: 0.3s; font-weight: 600; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
         }
         .tab-btn.active { background: var(--verde-fino); color: white; transform: translateY(-3px); }
 
-        /* Grid de Productos */
+        /* Ajuste del Grid para evitar que se encimen */
         .products-grid { 
             display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); 
-            gap: 25px; 
+            grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); 
+            gap: 30px; 
         }
 
         .product-edit-card { 
@@ -71,49 +71,52 @@
             padding: 25px; 
             display: flex; 
             gap: 20px; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.03);
-            border: 1px solid rgba(0,0,0,0.02);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            border: 1px solid rgba(0,0,0,0.05);
             transition: 0.3s;
+            align-items: flex-start;
         }
-        .product-edit-card:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(0,0,0,0.08); }
+        .product-edit-card:hover { transform: translateY(-5px); box-shadow: 0 15px 40px rgba(0,0,0,0.1); }
 
-        .img-side { text-align: center; }
-        .prod-img { width: 120px; height: 150px; border-radius: 18px; object-fit: cover; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .img-side { width: 130px; flex-shrink: 0; text-align: center; }
+        .prod-img { width: 130px; height: 160px; border-radius: 20px; object-fit: cover; box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
         
-        .prod-info { flex: 1; }
+        .prod-info { flex: 1; min-width: 0; } /* El min-width previene que los inputs se salgan */
         
-        .field-group { display: grid; gap: 12px; }
-        .field { display: flex; flex-direction: column; gap: 5px; }
-        .field label { font-size: 0.75rem; color: var(--texto-suave); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .field-group { display: grid; gap: 14px; }
+        .field { display: flex; flex-direction: column; gap: 6px; }
+        .field label { font-size: 0.7rem; color: var(--texto-suave); font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; }
         
         input, select { 
-            background: #f9fbfc; border: 1px solid #e1e8ed; 
-            color: var(--texto); padding: 10px; border-radius: 10px; font-family: inherit;
-            transition: 0.3s;
+            background: #f8faf9; border: 1px solid #e2e8e4; 
+            color: var(--texto); padding: 11px; border-radius: 12px; font-family: inherit;
+            transition: 0.3s; font-size: 0.9rem; width: 100%; box-sizing: border-box;
         }
-        input:focus { border-color: var(--naranja-accent); outline: none; background: white; }
+        input:focus { border-color: var(--verde-fino); outline: none; background: white; }
 
         .btn-save { 
-            width: 100%; margin-top: 15px; padding: 12px; border-radius: 12px; border: none;
+            width: 100%; margin-top: 20px; padding: 14px; border-radius: 15px; border: none;
             background: var(--verde-fino); color: white; font-weight: 700; cursor: pointer;
-            transition: 0.3s;
+            transition: 0.3s; font-size: 1rem;
         }
-        .btn-save:hover { background: #1e3d33; }
+        .btn-save:hover { background: #1a3a30; transform: scale(1.02); }
 
         .btn-delete { 
-            background: none; border: none; color: var(--danger); font-size: 0.8rem; 
-            cursor: pointer; margin-top: 12px; opacity: 0.6; transition: 0.3s;
+            background: none; border: none; color: var(--danger); font-size: 0.85rem; 
+            cursor: pointer; margin-top: 15px; opacity: 0.7; transition: 0.3s; font-weight: 500;
         }
         .btn-delete:hover { opacity: 1; text-decoration: underline; }
 
         .status-badge {
-            display: flex; align-items: center; gap: 8px; font-size: 0.8rem; margin-top: 10px;
-            color: var(--texto-suave); font-weight: 500;
+            display: flex; align-items: center; gap: 10px; font-size: 0.85rem; margin-top: 5px;
+            color: var(--texto); font-weight: 500; cursor: pointer;
         }
 
-        @media (max-width: 600px) {
-            .product-edit-card { flex-direction: column; }
-            .prod-img { width: 100%; height: 200px; }
+        @media (max-width: 500px) {
+            .products-grid { grid-template-columns: 1fr; }
+            .product-edit-card { flex-direction: column; align-items: center; }
+            .img-side { width: 100%; }
+            .prod-img { width: 100%; height: 250px; }
         }
     </style>
 </head>
@@ -139,7 +142,6 @@
             };
 
             const actualizarProducto = async (id, campos) => {
-                // Cálculo automático del precio de oferta si tiene descuento
                 const precioOferta = campos.tiene_descuento 
                     ? campos.precio - (campos.precio * (campos.porcentaje_descuento / 100))
                     : null;
@@ -155,13 +157,13 @@
 
                 if (error) alert("Error: " + error.message);
                 else {
-                    alert("Inventario actualizado correctamente.");
+                    alert("¡Cambios guardados con éxito!");
                     cargarProductos();
                 }
             };
 
             const eliminarProducto = async (id) => {
-                if(confirm("¿Estás seguro de eliminar esta prenda? Esta acción no se puede deshacer.")){
+                if(confirm("¿Seguro que quieres borrar esta prenda? No podrás recuperarla.")){
                     await _supabase.from('productos').delete().eq('id', id);
                     cargarProductos();
                 }
@@ -170,15 +172,15 @@
             return (
                 <div>
                     <header>
-                        <a href="admin.html" className="btn-back"><span>←</span> PANEL</a>
-                        <h1 style={{fontFamily: 'Playfair Display', fontSize: '1.2rem', margin: 0}}>GESTIÓN SIWA</h1>
+                        <a href="admin.html" className="btn-back">← VOLVER</a>
+                        <h1 style={{fontFamily: 'Playfair Display', fontSize: '1.3rem', margin: 0, letterSpacing: '1px'}}>SIWA INVENTARIO</h1>
                         <div style={{width: '60px'}}></div>
                     </header>
 
                     <main className="container">
                         <div className="welcome-header">
-                            <h2>Inventario</h2>
-                            <p style={{color: 'var(--texto-suave)'}}>Actualiza existencias, precios y descuentos</p>
+                            <h2>Editar Prendas</h2>
+                            <p style={{color: 'var(--texto-suave)'}}>Control total de precios, stock y visibilidad.</p>
                         </div>
 
                         <div className="tabs">
@@ -190,8 +192,8 @@
                         </div>
 
                         {loading ? (
-                            <div style={{textAlign: 'center', padding: '50px'}}>
-                                <p>Cargando catálogo...</p>
+                            <div style={{textAlign: 'center', padding: '100px', fontSize: '1.2rem', color: 'var(--verde-fino)'}}>
+                                <b>Cargando tu inventario...</b>
                             </div>
                         ) : (
                             <div className="products-grid">
@@ -219,7 +221,7 @@
                 if (!archivo) return;
                 try {
                     setSubiendo(true);
-                    const nombreArchivo = `${Date.now()}_${archivo.name}`;
+                    const nombreArchivo = `img_${Date.now()}`;
                     const { error: uploadError } = await _supabase.storage
                         .from('productos')
                         .upload(nombreArchivo, archivo);
@@ -232,7 +234,7 @@
 
                     setEdit({...edit, imagen_url: publicUrl});
                 } catch (error) {
-                    alert("Error al subir imagen: " + error.message);
+                    alert("Error con la imagen: " + error.message);
                 } finally {
                     setSubiendo(false);
                 }
@@ -241,9 +243,9 @@
             return (
                 <div className="product-edit-card">
                     <div className="img-side">
-                        <img src={edit.imagen_url} className="prod-img" style={{opacity: subiendo ? 0.5 : 1}} />
-                        <label style={{display: 'block', fontSize: '0.7rem', color: 'var(--naranja-accent)', marginTop: '12px', cursor: 'pointer', fontWeight: '600'}}>
-                            {subiendo ? 'Subiendo...' : 'REEMPLAZAR FOTO'}
+                        <img src={edit.imagen_url} className="prod-img" style={{opacity: subiendo ? 0.4 : 1}} />
+                        <label style={{display: 'block', fontSize: '0.7rem', color: 'var(--naranja-accent)', marginTop: '12px', cursor: 'pointer', fontWeight: '700'}}>
+                            {subiendo ? 'CARGANDO...' : 'REEMPLAZAR FOTO'}
                             <input type="file" hidden accept="image/*" onChange={cambiarImagen} disabled={subiendo} />
                         </label>
                     </div>
@@ -251,11 +253,11 @@
                     <div className="prod-info">
                         <div className="field-group">
                             <div className="field">
-                                <label>Nombre de la prenda</label>
+                                <label>Nombre</label>
                                 <input type="text" value={edit.nombre} onChange={e => setEdit({...edit, nombre: e.target.value})} />
                             </div>
 
-                            <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px'}}>
+                            <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px'}}>
                                 <div className="field">
                                     <label>Precio (₡)</label>
                                     <input type="number" value={edit.precio} onChange={e => setEdit({...edit, precio: parseFloat(e.target.value)})} />
@@ -271,29 +273,29 @@
 
                             {!edit.es_pieza_unica && (
                                 <div className="field">
-                                    <label>Stock Disponible</label>
+                                    <label>Unidades en Stock</label>
                                     <input type="number" min="1" value={edit.stock} onChange={e => setEdit({...edit, stock: e.target.value})} />
                                 </div>
                             )}
 
-                            <div style={{display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '10px'}}>
+                            <div style={{display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '12px'}}>
                                 <div className="field">
                                     <label>Promoción</label>
                                     <select value={edit.tiene_descuento} onChange={e => setEdit({...edit, tiene_descuento: e.target.value === 'true'})}>
                                         <option value="false">Precio Normal</option>
-                                        <option value="true">Aplicar Descuento</option>
+                                        <option value="true">Con Descuento</option>
                                     </select>
                                 </div>
                                 <div className="field">
-                                    <label>% Rebaja</label>
+                                    <label>% Off</label>
                                     <input type="number" disabled={!edit.tiene_descuento} value={edit.porcentaje_descuento} onChange={e => setEdit({...edit, porcentaje_descuento: parseInt(e.target.value)})} />
                                 </div>
                             </div>
 
-                            <div className="status-badge">
-                                <input type="checkbox" checked={edit.disponible} onChange={e => setEdit({...edit, disponible: e.target.checked})} />
-                                <span>Producto visible en tienda</span>
-                            </div>
+                            <label className="status-badge">
+                                <input type="checkbox" checked={edit.disponible} onChange={e => setEdit({...edit, disponible: e.target.checked})} style={{width: 'auto'}} />
+                                <span>Mostrar en la tienda</span>
+                            </label>
                         </div>
 
                         <button className="btn-save" onClick={() => onSave(edit)} disabled={subiendo}>
@@ -301,7 +303,7 @@
                         </button>
                         
                         <div style={{textAlign: 'center'}}>
-                            <button className="btn-delete" onClick={onDelete}>Eliminar permanentemente</button>
+                            <button className="btn-delete" onClick={onDelete}>Eliminar prenda</button>
                         </div>
                     </div>
                 </div>
