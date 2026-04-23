@@ -71,15 +71,15 @@ function App() {
     // --- LÓGICA MODALES DE AYUDA ---
     const openHelp = (type) => {
         const info = {
-    envios: {
-        title: 'Políticas de Envío 🚚',
-        content: 'Realizamos envíos a todo el país vía Correos de Costa Rica. En Guápiles Centro el envío es gratuito. Para el resto del país, el costo se calcula según la zona.'
-    },
-    terminos: {
-        title: 'Términos y Condiciones 📄',
-        content: 'Todas nuestras prendas son revisadas cuidadosamente antes del envío para garantizar su calidad. Al ser piezas de talla única, no se realizan cambios ni devoluciones. Una vez confirmada la compra, el artículo se reserva exclusivamente para usted.'
-    }
-};
+            envios: {
+                title: 'Políticas de Envío 🚚',
+                content: 'Realizamos envíos a todo el país vía Correos de Costa Rica. En Guápiles Centro el envío es gratuito. Para el resto del país, el costo se calcula según la zona.'
+            },
+            terminos: {
+                title: 'Términos y Condiciones 📄',
+                content: 'Todas nuestras prendas son revisadas cuidadosamente antes del envío para garantizar su calidad. Al ser piezas de talla única, no se realizan cambios ni devoluciones. Una vez confirmada la compra, el artículo se reserva exclusivamente para usted.'
+            }
+        };
         setHelpModal({ open: true, ...info[type] });
     };
 
@@ -191,14 +191,15 @@ function App() {
                         {items.map(item => {
                             const alreadyInCart = cart.some(c => c.id === item.id);
                             return (
-                                <article key={item.id} className="product-card" style={{ background: 'transparent' }}>
+                                <article key={item.id} className="product-card" style={{ background: 'transparent', display: 'flex', flexDirection: 'column' }}>
                                     <div className="image-wrapper" style={{ 
                                         width: '100%', 
                                         aspectRatio: '4 / 5', 
                                         borderRadius: '16px', 
                                         overflow: 'hidden',
                                         position: 'relative',
-                                        boxShadow: '0 4px 15px rgba(0,0,0,0.08)'
+                                        boxShadow: '0 4px 15px rgba(0,0,0,0.08)',
+                                        flexShrink: 0
                                     }}>
                                         {item.tiene_descuento && (
                                             <span className="promo-badge" style={{ 
@@ -217,10 +218,24 @@ function App() {
                                         />
                                     </div>
                                     
-                                    <div className="product-info" style={{ padding: '10px 2px' }}>
+                                    <div className="product-info" style={{ 
+                                        padding: '12px 2px', 
+                                        display: 'flex', 
+                                        flexDirection: 'column', 
+                                        flexGrow: 1 
+                                    }}>
                                         <span className="product-cat" style={{ fontSize: '0.7rem', opacity: 0.6 }}>{item.categoria}</span>
-                                        <h3 style={{ fontSize: isMobile ? '0.9rem' : '1.1rem', margin: '4px 0', lineHeight: '1.2' }}>{item.nombre}</h3>
-                                        <div className="product-price" style={{ marginBottom: '10px' }}>
+                                        <h3 style={{ 
+                                            fontSize: isMobile ? '0.9rem' : '1.1rem', 
+                                            margin: '4px 0', 
+                                            lineHeight: '1.2',
+                                            minHeight: isMobile ? '2.2rem' : '2.6rem', // Estándar para 2 líneas
+                                            display: '-webkit-box',
+                                            WebkitLineClamp: 2,
+                                            WebkitBoxOrient: 'vertical',
+                                            overflow: 'hidden'
+                                        }}>{item.nombre}</h3>
+                                        <div className="product-price" style={{ marginBottom: '12px', minHeight: '1.5rem' }}>
                                             {item.tiene_descuento ? (
                                                 <>
                                                     <span className="current-price" style={{ fontSize: '1rem', fontWeight: '700' }}>₡{parseInt(item.precio_offer || item.precio_oferta).toLocaleString()}</span>
@@ -243,7 +258,8 @@ function App() {
                                                 background: alreadyInCart ? '#ccc' : '#25D366', 
                                                 color: 'white', 
                                                 border: 'none', 
-                                                cursor: alreadyInCart ? 'default' : 'pointer'
+                                                cursor: alreadyInCart ? 'default' : 'pointer',
+                                                marginTop: 'auto' // Empuja el botón al final
                                             }}
                                         >
                                             {alreadyInCart ? 'Ya en el carrito' : 'Añadir al carrito'}
@@ -348,7 +364,6 @@ function App() {
                     <div className="footer-column">
                         <h4>Ayuda</h4>
                         <ul>
-                            <li>Guía de Tallas</li>
                             <li onClick={() => openHelp('envios')} style={{ cursor: 'pointer' }}>Envíos</li>
                             <li onClick={() => openHelp('terminos')} style={{ cursor: 'pointer' }}>Términos</li>
                         </ul>
@@ -361,7 +376,9 @@ function App() {
                 <div className="footer-bottom">
                     <div className="bottom-container">
                         <p>© 2026 Siwá Boutique. Todos los derechos reservados.</p>
-                        <p className="credit">By <strong>MONTZU</strong></p>
+                        <p className="credit">
+                            By <a href="https://wa.me/50661961136" target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', textDecoration: 'none' }}><strong>MONTZU</strong></a>
+                        </p>
                     </div>
                 </div>
             </footer>
