@@ -6,7 +6,18 @@
     --crema-fondo: #fcfaf7;  /* El fondo de la tarjeta del logo */
     --blanco: #ffffff;
     --texto: #444444;
+    
+    /* Variables dinámicas iniciales */
+    --bg-page: var(--crema-fondo);
+    --radius: 20px;
 }
+
+/* TEMAS PASTEL POR CATEGORÍA */
+/* Estos selectores se activan cuando la clase del app-container cambia */
+.app-container.tema-Todos { --bg-page: #fcfaf7; --radius: 20px; }
+.app-container.tema-Bebé  { --bg-page: #fff5f7; --radius: 40px; }
+.app-container.tema-Niño  { --bg-page: #f0f9ff; --radius: 10px; }
+.app-container.tema-Niña  { --bg-page: #fdf4ff; --radius: 30px; }
 
 /* FIX PARA PC: Asegura que el footer baje al final aunque haya poco contenido */
 html, body {
@@ -15,15 +26,17 @@ html, body {
 }
 
 body { 
-    background-color: var(--crema-fondo); 
+    background-color: var(--bg-page); 
     font-family: 'Outfit', sans-serif; 
     color: var(--texto);
+    transition: background-color 0.5s ease; /* Transición suave del fondo */
 }
 
 .app-container { 
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+    background-color: var(--bg-page);
     transition: background 0.5s; 
 }
 
@@ -104,9 +117,10 @@ body {
     margin: 20px 5%;
     padding: 40px 20px; 
     background: white;
-    border-radius: var(--radius, 20px);
+    border-radius: var(--radius);
     text-align: center;
     box-shadow: 0 10px 30px rgba(0,0,0,0.02);
+    transition: border-radius 0.5s ease;
 }
 
 .hero-label {
@@ -136,16 +150,17 @@ body {
 
 .product-card {
     background: white;
-    border-radius: var(--radius, 15px);
+    border-radius: var(--radius);
     padding: 12px;
-    transition: 0.3s;
+    transition: 0.3s, border-radius 0.5s ease;
     position: relative;
 }
 
 .image-wrapper {
     position: relative;
     overflow: hidden;
-    border-radius: calc(var(--radius, 15px) * 0.7);
+    border-radius: calc(var(--radius) * 0.7);
+    transition: border-radius 0.5s ease;
 }
 
 .image-wrapper img {
@@ -199,8 +214,9 @@ body {
     background: white;
     margin: 40px 5%;
     padding: 60px 20px;
-    border-radius: var(--radius, 20px);
+    border-radius: var(--radius);
     text-align: center;
+    transition: border-radius 0.5s ease;
 }
 
 .about-container { max-width: 700px; margin: 0 auto; }
@@ -229,11 +245,12 @@ body {
 
 /* FOOTER PROFESIONAL */
 .main-footer {
-    background: #2d3436; /* Color oscuro neutral para resaltar los pasteles */
+    background: #2d3436; 
     color: rgba(255, 255, 255, 0.9);
     padding: 60px 5% 20px;
     margin-top: 40px;
-    border-radius: var(--radius, 20px) var(--radius, 20px) 0 0;
+    border-radius: var(--radius) var(--radius) 0 0;
+    transition: border-radius 0.5s ease;
 }
 
 .footer-top {
@@ -295,9 +312,3 @@ body {
     .footer-top { grid-template-columns: 1fr; text-align: center; }
     .bottom-container { flex-direction: column; gap: 15px; text-align: center; }
 }
-
-/* TEMAS PASTEL POR CATEGORÍA */
-.tema-Todos { --bg-page: #fcfaf7; --radius: 20px; }
-.tema-Bebé { --bg-page: #fff5f7; --radius: 40px; }
-.tema-Niño { --bg-page: #f0f9ff; --radius: 10px; }
-.tema-Niña { --bg-page: #fdf4ff; --radius: 30px; }
