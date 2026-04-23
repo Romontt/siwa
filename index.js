@@ -89,13 +89,7 @@ function App() {
     const isMobile = window.innerWidth < 768;
 
     return (
-        <div className={`app-container theme-siwa`} style={{ 
-            boxSizing: 'border-box', 
-            maxWidth: '1400px', 
-            margin: '0 auto', 
-            overflowX: 'hidden',
-            background: '#fff'
-        }}>
+        <div className={`app-container theme-siwa`} style={{ boxSizing: 'border-box' }}>
             {/* NAVEGACIÓN */}
             <nav className="nav-bar" style={{ 
                 padding: isMobile ? '15px 10px' : '25px 40px',
@@ -104,13 +98,11 @@ function App() {
                 justifyContent: 'space-between',
                 position: 'sticky', top: 0, zIndex: 100, background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(10px)',
                 boxSizing: 'border-box',
-                width: '100%',
-                maxWidth: '1400px',
-                margin: '0 auto'
+                width: '100%'
             }}>
                 <div className="logo-wrapper" style={{ flexShrink: 0 }}>
                     <div className="siwa-brand" style={{ 
-                        fontSize: isMobile ? '1.8rem' : '3.2rem',
+                        fontSize: isMobile ? '2rem' : '3.2rem',
                         lineHeight: '1',
                         fontWeight: '900'
                     }}>
@@ -119,8 +111,8 @@ function App() {
                         <span className="logo-dot">.</span>
                     </div>
                     <small className="logo-tagline" style={{ 
-                        fontSize: isMobile ? '0.65rem' : '1.1rem',
-                        letterSpacing: isMobile ? '1px' : '4px',
+                        fontSize: isMobile ? '0.75rem' : '1.1rem',
+                        letterSpacing: isMobile ? '2px' : '4px',
                         display: 'block',
                         marginTop: '6px',
                         fontWeight: '800',
@@ -197,7 +189,7 @@ function App() {
                 ) : (
                     <div className="product-grid" style={{ 
                         display: 'grid', 
-                        gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(auto-fill, minmax(280px, 1fr))', 
+                        gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', 
                         gap: isMobile ? '12px' : '30px',
                         maxWidth: '1300px',
                         margin: '0 auto'
@@ -294,24 +286,30 @@ function App() {
                 )}
             </main>
 
-            {/* MODAL VISOR DE IMAGEN */}
+            {/* MODAL VISOR DE IMAGEN CORREGIDO */}
             {selectedImage && (
                 <div 
                     onClick={() => setSelectedImage(null)}
                     style={{
                         position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
-                        background: 'rgba(0,0,0,0.9)', zIndex: 3000, display: 'flex', 
-                        alignItems: 'center', justifyContent: 'center', padding: '20px',
+                        background: 'rgba(0,0,0,0.95)', zIndex: 3000, display: 'flex', 
+                        alignItems: 'center', justifyContent: 'center', padding: '15px',
                         cursor: 'zoom-out'
                     }}
                 >
                     <button 
                         onClick={() => setSelectedImage(null)}
-                        style={{ position: 'absolute', top: '20px', right: '20px', background: 'white', border: 'none', borderRadius: '50%', width: '40px', height: '40px', fontSize: '1.2rem', cursor: 'pointer', zIndex: 3001 }}
+                        style={{ position: 'absolute', top: '20px', right: '20px', background: 'white', border: 'none', borderRadius: '50%', width: '40px', height: '40px', fontSize: '1.2rem', cursor: 'pointer', zIndex: 3001, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                     >✕</button>
                     <img 
                         src={selectedImage} 
-                        style={{ maxWidth: '100%', maxHeight: '90vh', borderRadius: '8px', boxShadow: '0 0 20px rgba(0,0,0,0.5)' }} 
+                        style={{ 
+                            maxWidth: '100%', 
+                            maxHeight: '100%', 
+                            objectFit: 'contain', 
+                            borderRadius: '8px', 
+                            boxShadow: '0 0 30px rgba(0,0,0,0.5)' 
+                        }} 
                         alt="Vista ampliada"
                     />
                 </div>
