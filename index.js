@@ -70,10 +70,8 @@ function App() {
 
     // --- LÓGICA DE FUNCIONES DEL CARRITO ---
     const addToCart = (product) => {
-        // Contar cuántas unidades de este producto ya hay en el carrito
         const countInCart = cart.filter(item => item.id === product.id).length;
 
-        // Si aún hay stock disponible comparado con lo que hay en el carrito
         if (countInCart < product.stock) {
             setCart([...cart, { ...product, cartId: Date.now() + Math.random() }]);
             
@@ -108,7 +106,22 @@ function App() {
         });
 
         const mensajeBase = `¡Hola Siwá! 🌬️ Me interesa realizar el siguiente pedido:%0A%0A`;
-        const lista = cart.map(i => `- ${i.nombre} (₡${parseInt(i.tiene_descuento ? (i.precio_offer || i.precio_oferta) : i.precio).toLocaleString()})`).join('%0A');
+        
+        // Agrupar productos para que el mensaje sea más limpio
+        const itemsResumen = cart.reduce((acc, item) => {
+            const precio = parseInt(item.tiene_descuento ? (item.precio_offer || item.precio_oferta) : item.precio);
+            const key = `${item.nombre}-${precio}`;
+            if (!acc[key]) {
+                acc[key] = { nombre: item.nombre, precio, cantidad: 0 };
+            }
+            acc[key].cantidad += 1;
+            return acc;
+        }, {});
+
+        const lista = Object.values(itemsResumen).map(i => 
+            `- ${i.cantidad}x ${i.nombre} (₡${i.precio.toLocaleString()})`
+        ).join('%0A');
+
         const totalTexto = `%0A%0A*Total: ₡${cartTotal.toLocaleString()}*%0A_Envío gratis en Guápiles Centro_`;
         
         window.open(`https://wa.me/50683337497?text=${mensajeBase}${lista}${totalTexto}`);
@@ -155,7 +168,7 @@ function App() {
             }}>
                 <div className="logo-wrapper" style={{ flexShrink: 0 }}>
                     <div className="siwa-brand" style={{ 
-                        fontSize: isMobile ? '2rem' : '3.2rem',
+                        fontSize: isMobile ? '2rem' : '3.2rem', 
                         lineHeight: '1',
                         fontWeight: '900'
                     }}>
@@ -280,7 +293,6 @@ function App() {
                                                 left: '10px', top: '10px'
                                             }}>-{item.porcentaje_descuento}%</span>
                                         )}
-                                        {/* ETIQUETA DE ÚNICA PIEZA / ÚLTIMA DISPONIBLE */}
                                         {item.stock === 1 && (
                                             <span style={{
                                                 position: 'absolute', bottom: '10px', right: '10px',
@@ -396,6 +408,7 @@ function App() {
                 </div>
             )}
 
+            {/* CARRITO LATERAL */}
             {isCartOpen && (
                 <div style={{
                     position: 'fixed', top: 0, right: 0, bottom: 0, width: isMobile ? '100%' : '400px',
@@ -444,6 +457,7 @@ function App() {
                 </div>
             )}
 
+            {/* MODAL DE AYUDA */}
             {helpModal.open && (
                 <div style={{
                     position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
