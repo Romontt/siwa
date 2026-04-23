@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin | Siwa Boutique</title>
+    <title>Panel Administrativo | Siwa Boutique</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
@@ -11,114 +11,176 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { 
-            --bg: #fdfaf7; 
-            --card-bg: #ffffff; 
-            --accent: #d4a373; /* Dorado suave / Terracota */
-            --text: #4a3f35;
-            --text-light: #8e8276;
-            --danger: #e63946;
+            --azul-navy: #1a2a3a;
+            --verde-fino: #2d5a4c;
+            --naranja-accent: #e67e22;
+            --bg-claro: #f4f7f6;
+            --blanco: #ffffff;
+            --texto: #2c3e50;
+            --texto-suave: #7f8c8d;
         }
         
-        body { 
-            font-family: 'Outfit', sans-serif; 
-            background: var(--bg); 
+        body, html { 
             margin: 0; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            min-height: 100vh; 
-            color: var(--text); 
-        }
-
-        .card { 
-            background: var(--card-bg); 
-            width: 90%; 
-            max-width: 450px; 
-            padding: 40px; 
-            border-radius: 40px; 
-            box-shadow: 0 15px 35px rgba(212, 163, 115, 0.15); 
-            text-align: center; 
-            border: 1px solid rgba(212, 163, 115, 0.1);
-        }
-
-        h2 { font-family: 'Playfair Display', serif; font-size: 2rem; margin-bottom: 10px; color: var(--accent); }
-        p { color: var(--text-light); margin-bottom: 30px; }
-
-        input { 
+            padding: 0; 
             width: 100%; 
-            padding: 16px; 
-            margin: 15px 0; 
-            border-radius: 15px; 
-            border: 1px solid #e9e2db; 
-            background: #fff; 
-            color: var(--text); 
-            box-sizing: border-box; 
-            font-size: 1rem;
-            outline: none;
-            transition: 0.3s;
+            height: 100%; 
+            font-family: 'Outfit', sans-serif; 
+            background: var(--bg-claro); 
+            color: var(--texto);
         }
-        input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(212, 163, 115, 0.1); }
 
-        button.primary { 
-            width: 100%; 
-            padding: 16px; 
-            border-radius: 15px; 
-            border: none; 
-            background: var(--accent); 
-            color: white; 
-            font-weight: 600; 
-            cursor: pointer; 
-            transition: 0.3s; 
-            font-size: 1rem;
-        }
-        button.primary:hover { opacity: 0.9; transform: translateY(-2px); }
+        #root { width: 100%; height: 100%; }
 
-        .menu-grid { display: grid; gap: 15px; margin-top: 10px; }
-        
-        .menu-opt { 
+        /* Contenedor Principal Pantalla Completa */
+        .admin-container {
             display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            width: 100%;
+        }
+
+        /* Header Elegante */
+        header {
+            background: var(--azul-navy);
+            color: white;
+            padding: 20px 5%;
+            display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 15px;
-            background: #fff; 
-            padding: 20px; 
-            border-radius: 20px; 
-            text-decoration: none; 
-            color: var(--text); 
-            border: 1px solid #eeeae5; 
-            transition: 0.3s; 
-            text-align: left;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
-        .menu-opt:hover { 
-            border-color: var(--accent); 
-            background: #fffaf5;
-            transform: scale(1.02);
-        }
-        .icon-box {
+
+        header h1 { 
+            font-family: 'Playfair Display', serif; 
+            margin: 0; 
             font-size: 1.5rem;
-            background: #fdf1e8;
-            width: 50px;
-            height: 50px;
+            letter-spacing: 1px;
+        }
+
+        /* Cuerpo del Panel */
+        .main-content {
+            flex: 1;
+            padding: 40px 5%;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .welcome-section { margin-bottom: 40px; }
+        .welcome-section h2 { font-size: 2.5rem; margin: 0; color: var(--azul-navy); }
+        .welcome-section p { font-size: 1.1rem; color: var(--texto-suave); }
+
+        /* Grid de Opciones */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .menu-card {
+            background: var(--blanco);
+            padding: 35px;
+            border-radius: 25px;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            transition: all 0.4s ease;
+            border-left: 8px solid transparent;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.03);
+        }
+
+        .menu-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.08);
+        }
+
+        /* Colores específicos por tarjeta */
+        .card-nuevo { border-left-color: var(--naranja-accent); }
+        .card-inventario { border-left-color: var(--verde-fino); }
+        .card-ventas { border-left-color: var(--azul-navy); }
+
+        .icon-circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 12px;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
         }
 
-        .logout-btn { 
-            background: transparent; 
-            border: none; 
-            color: var(--text-light); 
-            font-size: 0.9rem; 
-            margin-top: 25px; 
+        .card-nuevo .icon-circle { background: #fff3e0; color: var(--naranja-accent); }
+        .card-inventario .icon-circle { background: #e8f5e9; color: var(--verde-fino); }
+        .card-ventas .icon-circle { background: #e1f5fe; color: var(--azul-navy); }
+
+        .menu-card strong { font-size: 1.4rem; margin-bottom: 10px; display: block; }
+        .menu-card p { margin: 0; color: var(--texto-suave); line-height: 1.5; }
+
+        /* Botón Salir */
+        .btn-logout {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 10px;
             cursor: pointer;
-            text-decoration: underline;
+            transition: 0.3s;
+        }
+        .btn-logout:hover { background: var(--naranja-accent); border-color: var(--naranja-accent); }
+
+        /* Login Centrado */
+        .login-screen {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: var(--azul-navy);
+        }
+        .login-box {
+            background: white;
+            padding: 50px;
+            border-radius: 35px;
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .login-box input {
+            width: 100%;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 12px;
+            border: 1px solid #ddd;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+
+        .btn-entrar {
+            background: var(--verde-fino);
+            color: white;
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .welcome-section h2 { font-size: 1.8rem; }
+            .dashboard-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
     <div id="root"></div>
     <script type="text/babel">
-        const { useState, useEffect } = React;
+        const { useState } = React;
         const _supabase = supabase.createClient('https://hvnpkljyoocqdzwdptgt.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2bnBrbGp5b29jcWR6d2RwdGd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2MTAxMTQsImV4cCI6MjA5MjE4NjExNH0.-pq3iVzqJsJCyGNXkFPlHSIQeBTrr7i7ptsY6FYjJZ0');
 
         function App() {
@@ -141,51 +203,54 @@
             };
 
             if (!isLogged) return (
-                <div className="card">
-                    <h2>Siwa Boutique</h2>
-                    <p>Panel de Administración</p>
-                    <input 
-                        type="password" 
-                        placeholder="Introduce la palabra clave" 
-                        onChange={e => setPass(e.target.value)} 
-                        onKeyPress={e => e.key === 'Enter' && login()}
-                    />
-                    <button className="primary" onClick={login}>Iniciar Sesión</button>
+                <div className="login-screen">
+                    <div className="login-box">
+                        <h2 style={{fontFamily: 'Playfair Display', color: '#1a2a3a'}}>Siwa Boutique</h2>
+                        <p>Panel de Control Privado</p>
+                        <input 
+                            type="password" 
+                            placeholder="Introduce el token de acceso" 
+                            onChange={e => setPass(e.target.value)} 
+                            onKeyPress={e => e.key === 'Enter' && login()}
+                        />
+                        <button className="btn-entrar" onClick={login}>Entrar al Panel</button>
+                    </div>
                 </div>
             );
 
             return (
-                <div className="card">
-                    <h2>Hola, Doris</h2>
-                    <p>¿Qué haremos en la tienda hoy?</p>
-                    
-                    <div className="menu-grid">
-                        <a href="agregar.html" className="menu-opt">
-                            <div className="icon-box">✨</div>
-                            <div>
-                                <strong style={{display: 'block'}}>Nuevo Producto</strong>
-                                <small style={{color: 'var(--text-light)'}}>Subir fotos y precios</small>
-                            </div>
-                        </a>
+                <div className="admin-container">
+                    <header>
+                        <h1>SIWA BOUTIQUE</h1>
+                        <button onClick={logout} className="btn-logout">Cerrar Sesión</button>
+                    </header>
 
-                        <a href="administrar.html" className="menu-opt">
-                            <div className="icon-box">🏷️</div>
-                            <div>
-                                <strong style={{display: 'block'}}>Inventario</strong>
-                                <small style={{color: 'var(--text-light)'}}>Cambiar tallas y stock</small>
-                            </div>
-                        </a>
+                    <main className="main-content">
+                        <div className="welcome-section">
+                            <h2>Hola, Doris</h2>
+                            <p>Gestión y control de inventario</p>
+                        </div>
 
-                        <a href="ventas.html" className="menu-opt">
-                            <div className="icon-box">💰</div>
-                            <div>
-                                <strong style={{display: 'block'}}>Ventas y Ganancias</strong>
-                                <small style={{color: 'var(--text-light)'}}>Confirmar pedidos de WhatsApp</small>
-                            </div>
-                        </a>
-                    </div>
+                        <div className="dashboard-grid">
+                            <a href="agregar.html" className="menu-card card-nuevo">
+                                <div className="icon-circle">✨</div>
+                                <strong>Nuevo Producto</strong>
+                                <p>Añade nuevas prendas a la colección y configúralas fácilmente.</p>
+                            </a>
 
-                    <button onClick={logout} className="logout-btn">Cerrar sesión de forma segura</button>
+                            <a href="administrar.html" className="menu-card card-inventario">
+                                <div className="icon-circle">🏷️</div>
+                                <strong>Inventario</strong>
+                                <p>Revisa stock, cambia precios y actualiza tallas disponibles.</p>
+                            </a>
+
+                            <a href="ventas.html" className="menu-card card-ventas">
+                                <div className="icon-circle">💰</div>
+                                <strong>Ventas y Ganancias</strong>
+                                <p>Confirma los pedidos de WhatsApp y analiza tus ingresos mensuales.</p>
+                            </a>
+                        </div>
+                    </main>
                 </div>
             );
         }
