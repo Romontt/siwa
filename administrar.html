@@ -21,7 +21,6 @@
 
         .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
         
-        /* Tabs de Categoría */
         .tabs { display: flex; gap: 10px; margin-bottom: 30px; justify-content: center; }
         .tab-btn { 
             padding: 12px 25px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.1);
@@ -29,9 +28,8 @@
         }
         .tab-btn.active { background: var(--naranja); border-color: var(--naranja); font-weight: 700; }
 
-        /* Grid de Productos */
         .products-grid { 
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; 
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px; 
         }
 
         .product-edit-card { 
@@ -40,12 +38,11 @@
         }
         .prod-img { width: 100px; height: 120px; border-radius: 12px; object-fit: cover; background: #000; }
         .prod-info { flex: 1; }
-        .prod-title { font-size: 0.9rem; font-weight: 700; margin: 0 0 10px 0; color: var(--naranja); opacity: 0.8; }
-
+        
         .edit-fields { display: grid; gap: 10px; }
         .field { display: flex; flex-direction: column; gap: 4px; }
         .field label { font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; }
-        input { 
+        input, select { 
             background: var(--input-bg); border: 1px solid rgba(255,255,255,0.1); 
             color: white; padding: 8px; border-radius: 8px; font-family: inherit;
         }
@@ -79,17 +76,21 @@
                 setLoading(false);
             };
 
-            const actualizarProducto = async (id, camposOriginales) => {
-                const nuevoPrecioOferta = camposOriginales.tiene_descuento 
-                    ? camposOriginales.precio - (camposOriginales.precio * (camposOriginales.porcentaje_descuento / 100))
+            const actualizarProducto = async (id, campos) => {
+                const nuevoPrecioOferta = campos.tiene_descuento 
+                    ? campos.precio - (campos.precio * (campos.porcentaje_descuento / 100))
                     : null;
 
                 const { error } = await _supabase
                     .from('productos')
-                    .update({ ...camposOriginales, precio_oferta: nuevoPrecioOferta })
+                    .update({ 
+                        ...campos, 
+                        precio_oferta: nuevoPrecioOferta,
+                        stock: campos.es_pieza_unica ? 1 : parseInt(campos.stock)
+                    })
                     .eq('id', id);
 
-                if (error) alert("Error al actualizar");
+                if (error) alert("Error al actualizar: " + error.message);
                 else alert("¡Cambios guardados!");
                 cargarProductos();
             };
@@ -145,25 +146,19 @@
 
                 try {
                     setSubiendo(true);
-                    if (producto.imagen_url) {
-                        const urlParts = producto.imagen_url.split('/');
-                        const oldFileName = urlParts[urlParts.length - 1];
-                        await _supabase.storage.from('productos').remove([`productos/${oldFileName}`]);
-                    }
-
                     const nombreArchivo = `${Date.now()}_${archivo.name}`;
                     const { error: uploadError } = await _supabase.storage
                         .from('productos')
-                        .upload(`productos/${nombreArchivo}`, archivo);
+                        .upload(nombreArchivo, archivo);
 
                     if (uploadError) throw uploadError;
 
                     const { data: { publicUrl } } = _supabase.storage
                         .from('productos')
-                        .getPublicUrl(`productos/${nombreArchivo}`);
+                        .getPublicUrl(nombreArchivo);
 
                     setEdit({...edit, imagen_url: publicUrl});
-                    alert("Imagen lista para guardar.");
+                    alert("Imagen lista.");
                 } catch (error) {
                     alert("Error con la imagen: " + error.message);
                 } finally {
@@ -184,33 +179,42 @@
                     <div className="prod-info">
                         <div className="edit-fields">
                             <div className="field">
-                                <label>Nombre del Producto</label>
-                                <input 
-                                    type="text" 
-                                    value={edit.nombre} 
-                                    onChange={e => setEdit({...edit, nombre: e.target.value})} 
-                                    placeholder="Ej. Conjunto de Verano"
-                                />
-                            </div>
-
-                            <div className="field">
-                                <label>Precio (₡)</label>
-                                <input type="number" value={edit.precio} onChange={e => setEdit({...edit, precio: parseFloat(e.target.value)})} />
+                                <label>Nombre</label>
+                                <input type="text" value={edit.nombre} onChange={e => setEdit({...edit, nombre: e.target.value})} />
                             </div>
 
                             <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px'}}>
                                 <div className="field">
+                                    <label>Precio (₡)</label>
+                                    <input type="number" value={edit.precio} onChange={e => setEdit({...edit, precio: parseFloat(e.target.value)})} />
+                                </div>
+                                <div className="field">
+                                    <label>¿Pieza Única?</label>
+                                    <select value={edit.es_pieza_unica} onChange={e => setEdit({...edit, es_pieza_unica: e.target.value === 'true', stock: e.target.value === 'true' ? 1 : edit.stock})}>
+                                        <option value="true">Sí</option>
+                                        <option value="false">No</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            {!edit.es_pieza_unica && (
+                                <div className="field">
+                                    <label>Cantidad en Stock</label>
+                                    <input type="number" min="1" value={edit.stock} onChange={e => setEdit({...edit, stock: e.target.value})} />
+                                </div>
+                            )}
+
+                            <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px'}}>
+                                <div className="field">
                                     <label>¿Descuento?</label>
-                                    <select style={{padding: '8px', borderRadius: '8px', background: 'var(--input-bg)', color: 'white', border: '1px solid rgba(255,255,255,0.1)'}} 
-                                            value={edit.tiene_descuento} onChange={e => setEdit({...edit, tiene_descuento: e.target.value === 'true'})}>
+                                    <select value={edit.tiene_descuento} onChange={e => setEdit({...edit, tiene_descuento: e.target.value === 'true'})}>
                                         <option value="false">No</option>
                                         <option value="true">Sí</option>
                                     </select>
                                 </div>
                                 <div className="field">
                                     <label>% Rebaja</label>
-                                    <input type="number" disabled={!edit.tiene_descuento} value={edit.porcentaje_descuento} 
-                                           onChange={e => setEdit({...edit, porcentaje_descuento: parseInt(e.target.value)})} />
+                                    <input type="number" disabled={!edit.tiene_descuento} value={edit.porcentaje_descuento} onChange={e => setEdit({...edit, porcentaje_descuento: parseInt(e.target.value)})} />
                                 </div>
                             </div>
 
