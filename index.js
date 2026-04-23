@@ -30,13 +30,9 @@ function App() {
         return id;
     })();
 
-    // Nueva función trackEvent con soporte para Google Analytics
     const trackEvent = async (table, data, gaEventName = null, gaParams = {}) => {
         try {
-            // 1. Envío a Supabase (Tu lógica original)
             await _supabase.from(table).insert([{ ...data, session_id: sessionId }]);
-
-            // 2. Envío a Google Analytics (GA4)
             if (window.gtag) {
                 const eventName = gaEventName || table;
                 window.gtag('event', eventName, {
@@ -50,7 +46,6 @@ function App() {
         }
     };
 
-    // Rastrear vista de página al cambiar categoría
     useEffect(() => {
         const path = cat === 'Todos' ? '/' : `/${cat}`;
         trackEvent('page_views', 
@@ -63,7 +58,8 @@ function App() {
     useEffect(() => {
         const loadData = async () => {
             setLoading(true);
-            let q = _supabase.from('productos').select('*').eq('disponible', true).gt('stock', 0);
+            // Eliminamos .gt('stock', 0) para que el producto no desaparezca de la vista al recargar
+            let q = _supabase.from('productos').select('*').eq('disponible', true);
             
             if (cat !== 'Todos') {
                 q = q.eq('categoria', cat);
@@ -81,7 +77,6 @@ function App() {
         loadData();
     }, [cat]);
 
-    // --- LÓGICA DE FUNCIONES DEL CARRITO ---
     const addToCart = (product) => {
         const countInCart = cart.filter(item => item.id === product.id).length;
 
@@ -147,7 +142,6 @@ function App() {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
-    // --- LÓGICA MODALES DE AYUDA ---
     const openHelp = (type) => {
         const info = {
             envios: { title: 'Políticas de Envío 🚚', content: 'Realizamos envíos a todo el país vía Correos de Costa Rica. En Guápiles Centro el envío es gratuito. Para el resto del país, el costo se calcula según la zona.' },
@@ -165,7 +159,6 @@ function App() {
 
     return (
         <div className={`app-container tema-${cat}`} style={{ boxSizing: 'border-box' }}>
-            {/* NAVEGACIÓN */}
             <nav className="nav-bar" style={{ 
                 padding: isMobile ? '15px 10px' : '25px 40px',
                 display: 'flex',
@@ -271,7 +264,9 @@ function App() {
                     }}>
                         {items.map(item => {
                             const countInCart = cart.filter(c => c.id === item.id).length;
-                            const isOutOfStock = countInCart >= item.stock;
+                            // El botón se deshabilita solo si el stock real es 0 o si ya se alcanzó el límite en el carrito
+                            const isOutOfStock = item.stock <= 0 || countInCart >= item.stock;
+                            const isAdded = countInCart > 0;
                             
                             return (
                                 <article key={item.id} className="product-card" style={{ display: 'flex', flexDirection: 'column' }}>
@@ -360,14 +355,14 @@ function App() {
                                                 borderRadius: '12px', 
                                                 fontSize: '0.8rem',
                                                 fontWeight: '600',
-                                                background: isOutOfStock ? '#ccc' : 'var(--verde-siwa)', 
+                                                background: isOutOfStock ? '#ccc' : (isAdded ? 'var(--rosa-siwa)' : 'var(--verde-siwa)'), 
                                                 color: 'white', 
                                                 border: 'none', 
                                                 cursor: isOutOfStock ? 'default' : 'pointer',
                                                 marginTop: 'auto'
                                             }}
                                         >
-                                            {isOutOfStock ? 'Sin stock disponible' : 'Añadir al carrito'}
+                                            {isOutOfStock ? 'Sin stock disponible' : (isAdded ? `Agregado (${countInCart})` : 'Añadir al carrito')}
                                         </button>
                                     </div>
                                 </article>
