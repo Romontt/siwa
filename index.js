@@ -5,7 +5,7 @@ function App() {
     const [cat, setCat] = useState('Todos');
     const [loading, setLoading] = useState(true);
     
-    // --- NUEVO: ESTADO DEL CARRITO ---
+    // --- ESTADO DEL CARRITO ---
     const [cart, setCart] = useState([]);
     const [isCartOpen, setIsCartOpen] = useState(false);
 
@@ -35,11 +35,10 @@ function App() {
         loadData();
     }, [cat]);
 
-    // --- NUEVA: LÓGICA DE FUNCIONES DEL CARRITO ---
+    // --- LÓGICA DE FUNCIONES DEL CARRITO ---
     const addToCart = (product) => {
-        // Usamos cartId para poder borrar items individuales aunque sean el mismo producto
+        // CORRECCIÓN: Se eliminó el setIsCartOpen(true) para que no abra el modal automáticamente
         setCart([...cart, { ...product, cartId: Date.now() + Math.random() }]);
-        if(!isMobile) setIsCartOpen(true); // Abrir carrito automáticamente en PC
     };
 
     const removeFromCart = (cartId) => {
@@ -67,18 +66,20 @@ function App() {
     const isMobile = window.innerWidth < 768;
 
     return (
-        <div className={`app-container theme-siwa`}>
+        <div className={`app-container theme-siwa`} style={{ boxSizing: 'border-box' }}>
             {/* NAVEGACIÓN */}
             <nav className="nav-bar" style={{ 
-                padding: isMobile ? '10px 15px' : '25px 40px',
+                padding: isMobile ? '15px 10px' : '25px 40px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                position: 'sticky', top: 0, zIndex: 100, background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(10px)'
+                position: 'sticky', top: 0, zIndex: 100, background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(10px)',
+                boxSizing: 'border-box',
+                width: '100%'
             }}>
                 <div className="logo-wrapper" style={{ flexShrink: 0 }}>
                     <div className="siwa-brand" style={{ 
-                        fontSize: isMobile ? '1.5rem' : '2.4rem', 
+                        fontSize: isMobile ? '1.3rem' : '2.4rem', 
                         lineHeight: '1' 
                     }}>
                         <span className="logo-symbol">@</span>
@@ -86,7 +87,7 @@ function App() {
                         <span className="logo-dot">.</span>
                     </div>
                     <small className="logo-tagline" style={{ 
-                        fontSize: isMobile ? '0.6rem' : '0.85rem',
+                        fontSize: isMobile ? '0.55rem' : '0.85rem',
                         letterSpacing: isMobile ? '1px' : '3px',
                         display: 'block',
                         marginTop: '4px'
@@ -96,9 +97,10 @@ function App() {
                 </div>
                 
                 <div className="nav-links" style={{ 
-                    gap: isMobile ? '8px' : '15px',
+                    gap: isMobile ? '5px' : '15px',
                     display: 'flex',
-                    alignItems: 'center'
+                    alignItems: 'center',
+                    marginLeft: '5px'
                 }}>
                     {['Todos', 'Bebé', 'Niño', 'Niña'].map(c => (
                         <button 
@@ -106,23 +108,41 @@ function App() {
                             className={cat === c ? 'nav-btn active' : 'nav-btn'} 
                             onClick={() => setCat(c)}
                             style={{ 
-                                fontSize: isMobile ? '0.75rem' : '1rem', 
-                                padding: isMobile ? '6px 10px' : '10px 20px',
-                                borderRadius: '12px'
+                                fontSize: isMobile ? '0.7rem' : '1rem', 
+                                padding: isMobile ? '6px 8px' : '10px 20px',
+                                borderRadius: '12px',
+                                border: 'none',
+                                cursor: 'pointer'
                             }}
                         >
                             {c}
                         </button>
                     ))}
                     
-                    {/* BOTÓN CARRITO EN NAV */}
+                    {/* BOTÓN CARRITO EN NAV - CORRECCIÓN: Ajuste de posición para que no se corte arriba */}
                     <button onClick={() => setIsCartOpen(!isCartOpen)} style={{
-                        background: '#f8f8f8', border: 'none', padding: '10px', borderRadius: '50%',
-                        position: 'relative', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                        background: '#f8f8f8', border: 'none', padding: isMobile ? '8px' : '10px', borderRadius: '50%',
+                        position: 'relative', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        marginLeft: isMobile ? '5px' : '10px'
                     }}>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                        <svg width={isMobile ? "18" : "20"} height={isMobile ? "18" : "20"} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
                         {cart.length > 0 && (
-                            <span style={{ position: 'absolute', top: '-5px', right: '-5px', background: 'var(--accent-color, #E8AAB8)', color: 'white', borderRadius: '50%', width: '18px', height: '18px', fontSize: '0.7rem', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
+                            <span style={{ 
+                                position: 'absolute', 
+                                top: isMobile ? '-2px' : '-5px', 
+                                right: isMobile ? '-2px' : '-5px', 
+                                background: 'var(--accent-color, #E8AAB8)', 
+                                color: 'white', 
+                                borderRadius: '50%', 
+                                width: isMobile ? '16px' : '18px', 
+                                height: isMobile ? '16px' : '18px', 
+                                fontSize: '0.65rem', 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                justifyContent: 'center', 
+                                fontWeight: 'bold',
+                                border: '2px solid white'
+                            }}>
                                 {cart.length}
                             </span>
                         )}
@@ -212,11 +232,11 @@ function App() {
                 )}
             </main>
 
-            {/* --- NUEVA INTERFAZ DE CARRITO (OVERLAY) --- */}
+            {/* --- INTERFAZ DE CARRITO (OVERLAY) --- */}
             {isCartOpen && (
                 <div style={{
                     position: 'fixed', top: 0, right: 0, bottom: 0, width: isMobile ? '100%' : '400px',
-                    background: 'white', zIndex: 1000, boxShadow: '-5px 0 30px rgba(0,0,0,0.1)',
+                    background: 'white', zIndex: 1001, boxShadow: '-5px 0 30px rgba(0,0,0,0.1)',
                     display: 'flex', flexDirection: 'column', animation: 'slideIn 0.3s ease'
                 }}>
                     <div style={{ padding: '20px', borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
