@@ -61,6 +61,11 @@
             position: absolute; top: 12px; right: 12px; background: var(--naranja); 
             color: white; padding: 4px 10px; border-radius: 8px; font-size: 0.7rem; font-weight: 700;
         }
+        .badge-unique {
+            position: absolute; bottom: 12px; left: 12px; background: #b45309; 
+            color: white; padding: 4px 10px; border-radius: 8px; font-size: 0.65rem; font-weight: 700;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
         .info { padding: 20px; }
         .cat-tag { font-size: 0.65rem; color: #64748b; text-transform: uppercase; font-weight: 700; margin: 0; }
         .p-title { font-size: 1rem; font-weight: 700; margin: 5px 0; color: #0d2c24; }
@@ -87,7 +92,8 @@
             const [imageFile, setImageFile] = useState(null);
             const [form, setForm] = useState({
                 nombre: '', categoria: 'Bebé', tallas: '', precio: '',
-                tiene_descuento: false, porcentaje_descuento: 0
+                tiene_descuento: false, porcentaje_descuento: 0,
+                es_pieza_unica: true, stock: 1
             });
 
             const _supabase = supabase.createClient(
@@ -123,7 +129,8 @@
                         porcentaje_descuento: parseInt(form.porcentaje_descuento),
                         precio_oferta: finalPrice,
                         imagen_url: publicUrl,
-                        disponible: true
+                        disponible: true,
+                        stock: form.es_pieza_unica ? 1 : parseInt(form.stock)
                     }]);
 
                     if (dbErr) throw dbErr;
@@ -162,9 +169,24 @@
                             </div>
 
                             <div className="form-group">
-                                <label>Tallas disponibles</label>
-                                <input type="text" placeholder="Ej: 2T, 4T, 6T" onChange={e => setForm({...form, tallas: e.target.value})} />
+                                <label>Talla de la prenda</label>
+                                <input type="text" placeholder="Ej: Recién Nacido, 2T, etc." onChange={e => setForm({...form, tallas: e.target.value})} />
                             </div>
+
+                            <div className="form-group">
+                                <label>¿Es Pieza Única?</label>
+                                <select onChange={e => setForm({...form, es_pieza_unica: e.target.value === 'true', stock: e.target.value === 'true' ? 1 : form.stock})}>
+                                    <option value="true">Sí (Solo hay una unidad)</option>
+                                    <option value="false">No (Hay varias unidades)</option>
+                                </select>
+                            </div>
+
+                            {!form.es_pieza_unica && (
+                                <div className="form-group">
+                                    <label>Cantidad en Stock</label>
+                                    <input type="number" placeholder="Ej: 5" min="1" onChange={e => setForm({...form, stock: e.target.value})} />
+                                </div>
+                            )}
 
                             <div className="form-group">
                                 <label>Precio Original (₡)</label>
@@ -205,11 +227,14 @@
                                     {form.tiene_descuento && form.porcentaje_descuento > 0 && (
                                         <div className="badge-promo">-{form.porcentaje_descuento}%</div>
                                     )}
+                                    {form.es_pieza_unica && (
+                                        <div className="badge-unique">✨ PIEZA ÚNICA</div>
+                                    )}
                                 </div>
                                 <div className="info">
                                     <p className="cat-tag">{form.categoria}</p>
                                     <h3 className="p-title">{form.nombre || 'Nombre del Producto'}</h3>
-                                    <p className="p-tallas">{form.tallas ? `Tallas: ${form.tallas}` : 'Tallas no especificadas'}</p>
+                                    <p className="p-tallas">{form.tallas ? `Talla: ${form.tallas}` : 'Talla no especificada'}</p>
                                     <div className="price-row">
                                         {form.tiene_descuento && (
                                             <span className="price-old">₡{parseInt(form.precio || 0).toLocaleString()}</span>
