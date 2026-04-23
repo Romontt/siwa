@@ -20,7 +20,7 @@ function App() {
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2bnBrbGp5b29jcWR6d2RwdGd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2MTAxMTQsImV4cCI6MjA5MjE4NjExNH0.-pq3iVzqJsJCyGNXkFPlHSIQeBTrr7i7ptsY6FYjJZ0'
     );
 
-    // --- LÓGICA DE RASTREO (Punto 506 / SIWÁ) ---
+    // --- LÓGICA DE RASTREO (Punto 506 / SIWÁ / GA4) ---
     const sessionId = (() => {
         let id = sessionStorage.getItem('siwa_session');
         if (!id) {
@@ -30,9 +30,21 @@ function App() {
         return id;
     })();
 
-    const trackEvent = async (table, data) => {
+    // Nueva función trackEvent con soporte para Google Analytics
+    const trackEvent = async (table, data, gaEventName = null, gaParams = {}) => {
         try {
+            // 1. Envío a Supabase (Tu lógica original)
             await _supabase.from(table).insert([{ ...data, session_id: sessionId }]);
+
+            // 2. Envío a Google Analytics (GA4)
+            if (window.gtag) {
+                const eventName = gaEventName || table;
+                window.gtag('event', eventName, {
+                    ...gaParams,
+                    session_id: sessionId,
+                    custom_path: data.page_path || window.location.pathname
+                });
+            }
         } catch (e) {
             console.error("Tracking error:", e);
         }
@@ -40,11 +52,12 @@ function App() {
 
     // Rastrear vista de página al cambiar categoría
     useEffect(() => {
-        trackEvent('page_views', {
-            page_path: cat === 'Todos' ? '/' : `/${cat}`,
-            user_agent: navigator.userAgent,
-            referrer: document.referrer
-        });
+        const path = cat === 'Todos' ? '/' : `/${cat}`;
+        trackEvent('page_views', 
+            { page_path: path, user_agent: navigator.userAgent, referrer: document.referrer },
+            'page_view', 
+            { page_title: `Categoría: ${cat}`, page_location: window.location.href }
+        );
     }, [cat]);
 
     useEffect(() => {
@@ -75,22 +88,26 @@ function App() {
         if (countInCart < product.stock) {
             setCart([...cart, { ...product, cartId: Date.now() + Math.random() }]);
             
-            trackEvent('user_clicks', {
-                element_id: 'btn-add-to-cart',
-                click_text: `Añadir: ${product.nombre}`,
-                page_path: window.location.pathname
-            });
+            trackEvent('user_clicks', 
+                { element_id: 'btn-add-to-cart', click_text: `Añadir: ${product.nombre}`, page_path: window.location.pathname },
+                'add_to_cart',
+                {
+                    currency: 'CRC',
+                    value: product.tiene_descuento ? (product.precio_offer || product.precio_oferta) : product.precio,
+                    items: [{ item_id: product.id, item_name: product.nombre, item_category: product.categoria }]
+                }
+            );
         }
     };
 
     const removeFromCart = (cartId) => {
         const item = cart.find(i => i.cartId === cartId);
         setCart(cart.filter(item => item.cartId !== cartId));
-        trackEvent('user_clicks', {
-            element_id: 'btn-remove-cart',
-            click_text: `Remover: ${item?.nombre}`,
-            page_path: window.location.pathname
-        });
+        trackEvent('user_clicks', 
+            { element_id: 'btn-remove-cart', click_text: `Remover: ${item?.nombre}`, page_path: window.location.pathname },
+            'remove_from_cart',
+            { items: [{ item_id: item?.id, item_name: item?.nombre }] }
+        );
     };
 
     const cartTotal = cart.reduce((acc, item) => {
@@ -99,15 +116,13 @@ function App() {
     }, 0);
 
     const enviarPedidoWhatsApp = () => {
-        trackEvent('user_clicks', {
-            element_id: 'btn-confirm-whatsapp',
-            click_text: 'Confirmar Pedido WhatsApp',
-            page_path: window.location.pathname
-        });
+        trackEvent('user_clicks', 
+            { element_id: 'btn-confirm-whatsapp', click_text: 'Confirmar Pedido WhatsApp', page_path: window.location.pathname },
+            'begin_checkout',
+            { currency: 'CRC', value: cartTotal, items: cart.map(i => ({ item_id: i.id, item_name: i.nombre })) }
+        );
 
         const mensajeBase = `¡Hola Siwá! 🌬️ Me interesa realizar el siguiente pedido:%0A%0A`;
-        
-        // Agrupar productos para que el mensaje sea más limpio
         const itemsResumen = cart.reduce((acc, item) => {
             const precio = parseInt(item.tiene_descuento ? (item.precio_offer || item.precio_oferta) : item.precio);
             const key = `${item.nombre}-${precio}`;
@@ -135,20 +150,14 @@ function App() {
     // --- LÓGICA MODALES DE AYUDA ---
     const openHelp = (type) => {
         const info = {
-            envios: {
-                title: 'Políticas de Envío 🚚',
-                content: 'Realizamos envíos a todo el país vía Correos de Costa Rica. En Guápiles Centro el envío es gratuito. Para el resto del país, el costo se calcula según la zona.'
-            },
-            terminos: {
-                title: 'Términos y Condiciones 📄',
-                content: 'Todas nuestras prendas son revisadas cuidadosamente antes del envío para garantizar su calidad. Al ser piezas de talla única, no se realizan cambios ni devoluciones. Una vez confirmada la compra, el artículo se reserva exclusivamente para usted.'
-            }
+            envios: { title: 'Políticas de Envío 🚚', content: 'Realizamos envíos a todo el país vía Correos de Costa Rica. En Guápiles Centro el envío es gratuito. Para el resto del país, el costo se calcula según la zona.' },
+            terminos: { title: 'Términos y Condiciones 📄', content: 'Todas nuestras prendas son revisadas cuidadosamente antes del envío para garantizar su calidad. Al ser piezas de talla única, no se realizan cambios ni devoluciones. Una vez confirmada la compra, el artículo se reserva exclusivamente para usted.' }
         };
-        trackEvent('user_clicks', {
-            element_id: `help-${type}`,
-            click_text: `Abrir ayuda: ${type}`,
-            page_path: window.location.pathname
-        });
+        trackEvent('user_clicks', 
+            { element_id: `help-${type}`, click_text: `Abrir ayuda: ${type}`, page_path: window.location.pathname },
+            'view_help_modal',
+            { help_type: type }
+        );
         setHelpModal({ open: true, ...info[type] });
     };
 
@@ -273,7 +282,7 @@ function App() {
                                                 element_id: 'product-zoom',
                                                 click_text: `Zoom: ${item.nombre}`,
                                                 page_path: window.location.pathname
-                                            });
+                                            }, 'view_item', { items: [{ item_id: item.id, item_name: item.nombre }] });
                                         }}
                                         style={{ 
                                             width: '100%', 
