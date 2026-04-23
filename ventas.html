@@ -194,9 +194,9 @@
                                                     <div className="txt-small">Base: ₡{Math.round(subtotal).toLocaleString()}</div>
                                                     <div className="txt-small">IVA (13%): ₡{Math.round(iva).toLocaleString()}</div>
                                                 </td>
-                                                <td style={{fontWeight: '600', color: var(--azul-navy)}}>
-                                                    ₡{Number(sale.total_amount).toLocaleString()}
-                                                </td>
+                                                <td style={{ fontWeight: '600', color: 'var(--azul-navy)' }}>
+    ₡{Number(sale.total_amount).toLocaleString('es-CR')}
+</td>
                                                 <td>
                                                     <span className={`badge badge-${sale.status}`}>
                                                         {sale.status === 'pending' ? 'Pendiente' : 'Pagado'}
