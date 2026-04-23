@@ -89,7 +89,8 @@ function App() {
     const isMobile = window.innerWidth < 768;
 
     return (
-        <div className={`app-container theme-siwa`} style={{ boxSizing: 'border-box' }}>
+        /* Se añade la clase dinámica tema-${cat} para conectar con el CSS de colores pasteles */
+        <div className={`app-container tema-${cat}`} style={{ boxSizing: 'border-box' }}>
             {/* NAVEGACIÓN */}
             <nav className="nav-bar" style={{ 
                 padding: isMobile ? '15px 10px' : '25px 40px',
@@ -156,7 +157,7 @@ function App() {
                                 position: 'absolute', 
                                 top: isMobile ? '-2px' : '-5px', 
                                 right: isMobile ? '-2px' : '-5px', 
-                                background: 'var(--accent-color, #E8AAB8)', 
+                                background: 'var(--rosa-siwa)', 
                                 color: 'white', 
                                 borderRadius: '50%', 
                                 width: isMobile ? '16px' : '18px', 
@@ -197,13 +198,12 @@ function App() {
                         {items.map(item => {
                             const alreadyInCart = cart.some(c => c.id === item.id);
                             return (
-                                <article key={item.id} className="product-card" style={{ background: 'transparent', display: 'flex', flexDirection: 'column' }}>
+                                <article key={item.id} className="product-card" style={{ display: 'flex', flexDirection: 'column' }}>
                                     <div className="image-wrapper" 
                                         onClick={() => setSelectedImage(item.imagen_url)}
                                         style={{ 
                                             width: '100%', 
                                             aspectRatio: '4 / 5', 
-                                            borderRadius: '16px', 
                                             overflow: 'hidden',
                                             position: 'relative',
                                             boxShadow: '0 4px 15px rgba(0,0,0,0.08)',
@@ -216,7 +216,7 @@ function App() {
                                                 zIndex: 2,
                                                 fontSize: '0.7rem',
                                                 padding: '4px 8px',
-                                                background: '#E8AAB8', color: 'white', left: '10px', top: '10px', borderRadius: '8px'
+                                                left: '10px', top: '10px'
                                             }}>-{item.porcentaje_descuento}%</span>
                                         )}
                                         <img 
@@ -269,7 +269,7 @@ function App() {
                                                 borderRadius: '12px', 
                                                 fontSize: '0.8rem',
                                                 fontWeight: '600',
-                                                background: alreadyInCart ? '#ccc' : '#25D366', 
+                                                background: alreadyInCart ? '#ccc' : 'var(--verde-siwa)', 
                                                 color: 'white', 
                                                 border: 'none', 
                                                 cursor: alreadyInCart ? 'default' : 'pointer',
@@ -286,7 +286,7 @@ function App() {
                 )}
             </main>
 
-            {/* MODAL VISOR DE IMAGEN CORREGIDO */}
+            {/* MODAL VISOR DE IMAGEN */}
             {selectedImage && (
                 <div 
                     onClick={() => setSelectedImage(null)}
@@ -363,7 +363,7 @@ function App() {
                             <div style={{ background: '#e9f7ef', padding: '10px', borderRadius: '8px', color: '#27ae60', fontSize: '0.8rem', textAlign: 'center', marginBottom: '15px', fontWeight: 'bold' }}>
                                 ✨ ¡Envío gratis en Guápiles Centro!
                             </div>
-                            <button onClick={enviarPedidoWhatsApp} className="wa-button" style={{ 
+                            <button onClick={enviarPedidoWhatsApp} style={{ 
                                 width: '100%', padding: '15px', borderRadius: '12px', background: '#25D366', color: 'white', 
                                 border: 'none', fontWeight: 'bold', fontSize: '1rem', cursor: 'pointer' 
                             }}>
@@ -381,7 +381,7 @@ function App() {
                 }}>
                     <div style={{ background: 'white', padding: '30px', borderRadius: '20px', maxWidth: '500px', width: '100%', position: 'relative' }}>
                         <button onClick={() => setHelpModal({ ...helpModal, open: false })} style={{ position: 'absolute', top: '15px', right: '15px', background: 'none', border: 'none', fontSize: '1.2rem', cursor: 'pointer' }}>✕</button>
-                        <h2 style={{ marginTop: 0, color: '#E8AAB8' }}>{helpModal.title}</h2>
+                        <h2 style={{ marginTop: 0, color: 'var(--rosa-siwa)' }}>{helpModal.title}</h2>
                         <p style={{ lineHeight: '1.6', color: '#666' }}>{helpModal.content}</p>
                         <button onClick={() => setHelpModal({ ...helpModal, open: false })} style={{ width: '100%', padding: '12px', borderRadius: '12px', background: '#333', color: 'white', border: 'none', marginTop: '20px', cursor: 'pointer' }}>Entendido</button>
                     </div>
