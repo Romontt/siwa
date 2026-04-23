@@ -71,15 +71,15 @@ function App() {
     // --- LÓGICA MODALES DE AYUDA ---
     const openHelp = (type) => {
         const info = {
-            envios: {
-                title: 'Políticas de Envío 🚚',
-                content: 'Realizamos envíos a todo el país vía Correos de Costa Rica. En Guápiles Centro el envío es gratuito. Para el resto del país, el costo se calcula según la zona.'
-            },
-            terminos: {
-                title: 'Términos y Condiciones 📄',
-                content: 'Todas nuestras prendas son revisadas antes del envío. No se aceptan devoluciones en prendas de oferta. Los cambios por talla están sujetos a disponibilidad de stock.'
-            }
-        };
+    envios: {
+        title: 'Políticas de Envío 🚚',
+        content: 'Realizamos envíos a todo el país vía Correos de Costa Rica. En Guápiles Centro el envío es gratuito. Para el resto del país, el costo se calcula según la zona.'
+    },
+    terminos: {
+        title: 'Términos y Condiciones 📄',
+        content: 'Todas nuestras prendas son revisadas cuidadosamente antes del envío para garantizar su calidad. Al ser piezas de talla única, no se realizan cambios ni devoluciones. Una vez confirmada la compra, el artículo se reserva exclusivamente para usted.'
+    }
+};
         setHelpModal({ open: true, ...info[type] });
     };
 
