@@ -89,7 +89,13 @@ function App() {
     const isMobile = window.innerWidth < 768;
 
     return (
-        <div className={`app-container theme-siwa`} style={{ boxSizing: 'border-box' }}>
+        <div className={`app-container theme-siwa`} style={{ 
+            boxSizing: 'border-box', 
+            maxWidth: '1400px', 
+            margin: '0 auto', 
+            overflowX: 'hidden',
+            background: '#fff'
+        }}>
             {/* NAVEGACIÓN */}
             <nav className="nav-bar" style={{ 
                 padding: isMobile ? '15px 10px' : '25px 40px',
@@ -98,11 +104,13 @@ function App() {
                 justifyContent: 'space-between',
                 position: 'sticky', top: 0, zIndex: 100, background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(10px)',
                 boxSizing: 'border-box',
-                width: '100%'
+                width: '100%',
+                maxWidth: '1400px',
+                margin: '0 auto'
             }}>
                 <div className="logo-wrapper" style={{ flexShrink: 0 }}>
                     <div className="siwa-brand" style={{ 
-                        fontSize: isMobile ? '2rem' : '3.2rem',
+                        fontSize: isMobile ? '1.8rem' : '3.2rem',
                         lineHeight: '1',
                         fontWeight: '900'
                     }}>
@@ -111,8 +119,8 @@ function App() {
                         <span className="logo-dot">.</span>
                     </div>
                     <small className="logo-tagline" style={{ 
-                        fontSize: isMobile ? '0.75rem' : '1.1rem',
-                        letterSpacing: isMobile ? '2px' : '4px',
+                        fontSize: isMobile ? '0.65rem' : '1.1rem',
+                        letterSpacing: isMobile ? '1px' : '4px',
                         display: 'block',
                         marginTop: '6px',
                         fontWeight: '800',
@@ -189,7 +197,7 @@ function App() {
                 ) : (
                     <div className="product-grid" style={{ 
                         display: 'grid', 
-                        gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', 
+                        gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(auto-fill, minmax(280px, 1fr))', 
                         gap: isMobile ? '12px' : '30px',
                         maxWidth: '1300px',
                         margin: '0 auto'
