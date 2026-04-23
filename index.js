@@ -37,8 +37,11 @@ function App() {
 
     // --- LÓGICA DE FUNCIONES DEL CARRITO ---
     const addToCart = (product) => {
-        // CORRECCIÓN: Se eliminó el setIsCartOpen(true) para que no abra el modal automáticamente
-        setCart([...cart, { ...product, cartId: Date.now() + Math.random() }]);
+        // VALIDACIÓN DE PRENDA ÚNICA: Solo permite agregar si no existe ya en el carrito
+        const exists = cart.find(item => item.id === product.id);
+        if (!exists) {
+            setCart([...cart, { ...product, cartId: Date.now() + Math.random() }]);
+        }
     };
 
     const removeFromCart = (cartId) => {
@@ -119,7 +122,6 @@ function App() {
                         </button>
                     ))}
                     
-                    {/* BOTÓN CARRITO EN NAV - CORRECCIÓN: Ajuste de posición para que no se corte arriba */}
                     <button onClick={() => setIsCartOpen(!isCartOpen)} style={{
                         background: '#f8f8f8', border: 'none', padding: isMobile ? '8px' : '10px', borderRadius: '50%',
                         position: 'relative', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -150,7 +152,6 @@ function App() {
                 </div>
             </nav>
 
-            {/* HERO DINÁMICO */}
             <header className="hero-section">
                 <div className="hero-content">
                     <span className="hero-label">Colección 2026</span>
@@ -159,7 +160,6 @@ function App() {
                 </div>
             </header>
 
-            {/* GRID DE PRODUCTOS */}
             <main className="main-content" style={{ padding: isMobile ? '15px 8px' : '40px 20px', paddingBottom: '100px' }}>
                 {loading ? (
                     <div className="loader">Cargando tesoros...</div>
@@ -171,63 +171,72 @@ function App() {
                         maxWidth: '1300px',
                         margin: '0 auto'
                     }}>
-                        {items.map(item => (
-                            <article key={item.id} className="product-card" style={{ background: 'transparent' }}>
-                                <div className="image-wrapper" style={{ 
-                                    width: '100%', 
-                                    aspectRatio: '4 / 5', 
-                                    borderRadius: '16px', 
-                                    overflow: 'hidden',
-                                    position: 'relative',
-                                    boxShadow: '0 4px 15px rgba(0,0,0,0.08)'
-                                }}>
-                                    {item.tiene_descuento && (
-                                        <span className="promo-badge" style={{ 
-                                            position: 'absolute', 
-                                            zIndex: 2,
-                                            fontSize: '0.7rem',
-                                            padding: '4px 8px',
-                                            background: '#E8AAB8', color: 'white', left: '10px', top: '10px', borderRadius: '8px'
-                                        }}>-{item.porcentaje_descuento}%</span>
-                                    )}
-                                    <img 
-                                        src={item.imagen_url} 
-                                        alt={item.nombre} 
-                                        loading="lazy" 
-                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                    />
-                                </div>
-                                
-                                <div className="product-info" style={{ padding: '10px 2px' }}>
-                                    <span className="product-cat" style={{ fontSize: '0.7rem', opacity: 0.6 }}>{item.categoria}</span>
-                                    <h3 style={{ fontSize: isMobile ? '0.9rem' : '1.1rem', margin: '4px 0', lineHeight: '1.2' }}>{item.nombre}</h3>
-                                    <div className="product-price" style={{ marginBottom: '10px' }}>
-                                        {item.tiene_descuento ? (
-                                            <>
-                                                <span className="current-price" style={{ fontSize: '1rem', fontWeight: '700' }}>₡{parseInt(item.precio_offer || item.precio_oferta).toLocaleString()}</span>
-                                                <span className="old-price" style={{ fontSize: '0.8rem', opacity: 0.5, textDecoration: 'line-through', marginLeft: '8px' }}>₡{parseInt(item.precio).toLocaleString()}</span>
-                                            </>
-                                        ) : (
-                                            <span className="current-price" style={{ fontSize: '1rem', fontWeight: '700' }}>₡{parseInt(item.precio).toLocaleString()}</span>
+                        {items.map(item => {
+                            // Verificamos si este item ya está en el carrito
+                            const alreadyInCart = cart.some(c => c.id === item.id);
+                            
+                            return (
+                                <article key={item.id} className="product-card" style={{ background: 'transparent' }}>
+                                    <div className="image-wrapper" style={{ 
+                                        width: '100%', 
+                                        aspectRatio: '4 / 5', 
+                                        borderRadius: '16px', 
+                                        overflow: 'hidden',
+                                        position: 'relative',
+                                        boxShadow: '0 4px 15px rgba(0,0,0,0.08)'
+                                    }}>
+                                        {item.tiene_descuento && (
+                                            <span className="promo-badge" style={{ 
+                                                position: 'absolute', 
+                                                zIndex: 2,
+                                                fontSize: '0.7rem',
+                                                padding: '4px 8px',
+                                                background: '#E8AAB8', color: 'white', left: '10px', top: '10px', borderRadius: '8px'
+                                            }}>-{item.porcentaje_descuento}%</span>
                                         )}
+                                        <img 
+                                            src={item.imagen_url} 
+                                            alt={item.nombre} 
+                                            loading="lazy" 
+                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                        />
                                     </div>
-                                    <button 
-                                        className="wa-button"
-                                        onClick={() => addToCart(item)}
-                                        style={{ 
-                                            width: '100%', 
-                                            padding: '10px', 
-                                            borderRadius: '12px', 
-                                            fontSize: '0.8rem',
-                                            fontWeight: '600',
-                                            background: '#25D366', color: 'white', border: 'none', cursor: 'pointer'
-                                        }}
-                                    >
-                                        Añadir al carrito
-                                    </button>
-                                </div>
-                            </article>
-                        ))}
+                                    
+                                    <div className="product-info" style={{ padding: '10px 2px' }}>
+                                        <span className="product-cat" style={{ fontSize: '0.7rem', opacity: 0.6 }}>{item.categoria}</span>
+                                        <h3 style={{ fontSize: isMobile ? '0.9rem' : '1.1rem', margin: '4px 0', lineHeight: '1.2' }}>{item.nombre}</h3>
+                                        <div className="product-price" style={{ marginBottom: '10px' }}>
+                                            {item.tiene_descuento ? (
+                                                <>
+                                                    <span className="current-price" style={{ fontSize: '1rem', fontWeight: '700' }}>₡{parseInt(item.precio_offer || item.precio_oferta).toLocaleString()}</span>
+                                                    <span className="old-price" style={{ fontSize: '0.8rem', opacity: 0.5, textDecoration: 'line-through', marginLeft: '8px' }}>₡{parseInt(item.precio).toLocaleString()}</span>
+                                                </>
+                                            ) : (
+                                                <span className="current-price" style={{ fontSize: '1rem', fontWeight: '700' }}>₡{parseInt(item.precio).toLocaleString()}</span>
+                                            )}
+                                        </div>
+                                        <button 
+                                            className="wa-button"
+                                            onClick={() => addToCart(item)}
+                                            disabled={alreadyInCart}
+                                            style={{ 
+                                                width: '100%', 
+                                                padding: '10px', 
+                                                borderRadius: '12px', 
+                                                fontSize: '0.8rem',
+                                                fontWeight: '600',
+                                                background: alreadyInCart ? '#ccc' : '#25D366', 
+                                                color: 'white', 
+                                                border: 'none', 
+                                                cursor: alreadyInCart ? 'default' : 'pointer'
+                                            }}
+                                        >
+                                            {alreadyInCart ? 'Ya en el carrito' : 'Añadir al carrito'}
+                                        </button>
+                                    </div>
+                                </article>
+                            );
+                        })}
                     </div>
                 )}
             </main>
@@ -281,7 +290,6 @@ function App() {
                 </div>
             )}
 
-            {/* SECCIÓN NOSOTROS */}
             <section className="about-section">
                 <div className="about-container">
                     <div className="about-visual">
@@ -296,7 +304,6 @@ function App() {
                 </div>
             </section>
 
-            {/* FOOTER */}
             <footer className="main-footer">
                 <div className="footer-top">
                     <div className="footer-column brand-col">
