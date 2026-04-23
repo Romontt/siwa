@@ -20,7 +20,6 @@ function App() {
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2bnBrbGp5b29jcWR6d2RwdGd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2MTAxMTQsImV4cCI6MjA5MjE4NjExNH0.-pq3iVzqJsJCyGNXkFPlHSIQeBTrr7i7ptsY6FYjJZ0'
     );
 
-    // --- LÓGICA DE RASTREO (Punto 506 / SIWÁ / GA4) ---
     const sessionId = (() => {
         let id = sessionStorage.getItem('siwa_session');
         if (!id) {
@@ -58,15 +57,11 @@ function App() {
     useEffect(() => {
         const loadData = async () => {
             setLoading(true);
-            // Eliminamos .gt('stock', 0) para que el producto no desaparezca de la vista al recargar
             let q = _supabase.from('productos').select('*').eq('disponible', true);
-            
             if (cat !== 'Todos') {
                 q = q.eq('categoria', cat);
             }
-            
             const { data, error } = await q.order('created_at', { ascending: false });
-            
             if (error) {
                 console.error("Error cargando datos:", error.message);
             } else {
@@ -79,10 +74,9 @@ function App() {
 
     const addToCart = (product) => {
         const countInCart = cart.filter(item => item.id === product.id).length;
-
-        if (countInCart < product.stock) {
+        // Solo permite agregar si no está ya en el carrito (bloqueo solicitado)
+        if (countInCart === 0) {
             setCart([...cart, { ...product, cartId: Date.now() + Math.random() }]);
-            
             trackEvent('user_clicks', 
                 { element_id: 'btn-add-to-cart', click_text: `Añadir: ${product.nombre}`, page_path: window.location.pathname },
                 'add_to_cart',
@@ -110,7 +104,23 @@ function App() {
         return acc + parseInt(precio);
     }, 0);
 
-    const enviarPedidoWhatsApp = () => {
+    const enviarPedidoWhatsApp = async () => {
+        // 1. Guardar en la tabla "ventas" para que aparezca en ventas.html
+        try {
+            const { error } = await _supabase.from('ventas').insert([
+                {
+                    productos: cart,
+                    total: cartTotal,
+                    estado: 'pendiente',
+                    session_id: sessionId
+                }
+            ]);
+            if (error) throw error;
+        } catch (err) {
+            console.error("Error al registrar venta:", err);
+        }
+
+        // 2. Lógica de WhatsApp
         trackEvent('user_clicks', 
             { element_id: 'btn-confirm-whatsapp', click_text: 'Confirmar Pedido WhatsApp', page_path: window.location.pathname },
             'begin_checkout',
@@ -134,7 +144,10 @@ function App() {
 
         const totalTexto = `%0A%0A*Total: ₡${cartTotal.toLocaleString()}*%0A_Envío gratis en Guápiles Centro_`;
         
+        // 3. Abrir WhatsApp, limpiar carrito y cerrar modal
         window.open(`https://wa.me/50683337497?text=${mensajeBase}${lista}${totalTexto}`);
+        setCart([]);
+        setIsCartOpen(false);
     };
 
     const navTo = (nuevaCat) => {
@@ -263,10 +276,9 @@ function App() {
                         margin: '0 auto'
                     }}>
                         {items.map(item => {
-                            const countInCart = cart.filter(c => c.id === item.id).length;
-                            // El botón se deshabilita solo si el stock real es 0 o si ya se alcanzó el límite en el carrito
-                            const isOutOfStock = item.stock <= 0 || countInCart >= item.stock;
-                            const isAdded = countInCart > 0;
+                            const isAdded = cart.some(c => c.id === item.id);
+                            // Solo bloqueamos si el stock real es 0 (agotado) o si ya está en el carrito
+                            const isBlocked = item.stock <= 0 || isAdded;
                             
                             return (
                                 <article key={item.id} className="product-card" style={{ display: 'flex', flexDirection: 'column' }}>
@@ -348,21 +360,21 @@ function App() {
                                         <button 
                                             className="wa-button"
                                             onClick={() => addToCart(item)}
-                                            disabled={isOutOfStock}
+                                            disabled={isBlocked}
                                             style={{ 
                                                 width: '100%', 
                                                 padding: '10px', 
                                                 borderRadius: '12px', 
                                                 fontSize: '0.8rem',
                                                 fontWeight: '600',
-                                                background: isOutOfStock ? '#ccc' : (isAdded ? 'var(--rosa-siwa)' : 'var(--verde-siwa)'), 
+                                                background: item.stock <= 0 ? '#ccc' : (isAdded ? '#888' : 'var(--verde-siwa)'), 
                                                 color: 'white', 
                                                 border: 'none', 
-                                                cursor: isOutOfStock ? 'default' : 'pointer',
+                                                cursor: isBlocked ? 'default' : 'pointer',
                                                 marginTop: 'auto'
                                             }}
                                         >
-                                            {isOutOfStock ? 'Sin stock disponible' : (isAdded ? `Agregado (${countInCart})` : 'Añadir al carrito')}
+                                            {item.stock <= 0 ? 'Sin stock disponible' : (isAdded ? 'Producto ya agregado al carrito' : 'Añadir al carrito')}
                                         </button>
                                     </div>
                                 </article>
