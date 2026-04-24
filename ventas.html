@@ -144,7 +144,7 @@
             }
 
             async function confirmSale(sale) {
-                if(!confirm("¿Confirmar pago y actualizar inventario?")) return;
+                if(!confirm("¿Confirmar pago? La prenda quedará marcada como NO disponible.")) return;
                 
                 const { error: updateError } = await _supabase
                     .from('sales')
@@ -157,28 +157,19 @@
                 }
 
                 if (sale.product_id) {
-                    const { data: productData } = await _supabase
+                    // Si se completa, disponible = false (el stock se mantiene en 1)
+                    await _supabase
                         .from('productos')
-                        .select('stock')
-                        .eq('id', sale.product_id)
-                        .single();
-
-                    if (productData) {
-                        const newStock = Math.max(0, (productData.stock || 0) - 1);
-                        await _supabase
-                            .from('productos')
-                            .update({ stock: newStock })
-                            .eq('id', sale.product_id);
-                    }
+                        .update({ disponible: false })
+                        .eq('id', sale.product_id);
                 }
 
                 fetchSales();
             }
 
             async function cancelSale(sale) {
-                if(!confirm("¿Anular esta venta? La prenda volverá a estar disponible en el inventario.")) return;
+                if(!confirm("¿Anular esta venta? La prenda volverá a estar disponible.")) return;
                 
-                // 1. Cambiamos estado de la venta
                 const { error: saleError } = await _supabase
                     .from('sales')
                     .update({ status: 'cancelled' })
@@ -189,26 +180,14 @@
                     return;
                 }
 
-                // 2. Devolvemos la unidad al inventario (Stock + 1)
                 if (sale.product_id) {
-                    const { data: productData } = await _supabase
+                    // Si no se completa, disponible = true
+                    const { error: prodError } = await _supabase
                         .from('productos')
-                        .select('stock')
-                        .eq('id', sale.product_id)
-                        .single();
-
-                    if (productData) {
-                        const restoredStock = (productData.stock || 0) + 1;
-                        const { error: prodError } = await _supabase
-                            .from('productos')
-                            .update({ 
-                                stock: restoredStock,
-                                disponible: true // Nos aseguramos de marcarlo como disponible también
-                            })
-                            .eq('id', sale.product_id);
-                        
-                        if (prodError) console.error("Error al restaurar stock:", prodError.message);
-                    }
+                        .update({ disponible: true })
+                        .eq('id', sale.product_id);
+                    
+                    if (prodError) console.error("Error al restaurar disponibilidad:", prodError.message);
                 }
 
                 fetchSales();
