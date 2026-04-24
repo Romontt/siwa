@@ -176,7 +176,7 @@
             }
 
             async function cancelSale(sale) {
-                if(!confirm("¿Anular esta venta? La prenda volverá a estar disponible.")) return;
+                if(!confirm("¿Anular esta venta? La prenda volverá a estar disponible en el inventario.")) return;
                 
                 // 1. Cambiamos estado de la venta
                 const { error: saleError } = await _supabase
@@ -189,14 +189,26 @@
                     return;
                 }
 
-                // 2. Si hay un product_id, lo volvemos a poner como disponible
+                // 2. Devolvemos la unidad al inventario (Stock + 1)
                 if (sale.product_id) {
-                    const { error: prodError } = await _supabase
+                    const { data: productData } = await _supabase
                         .from('productos')
-                        .update({ disponible: true })
-                        .eq('id', sale.product_id);
-                    
-                    if (prodError) console.error("Error activando producto:", prodError.message);
+                        .select('stock')
+                        .eq('id', sale.product_id)
+                        .single();
+
+                    if (productData) {
+                        const restoredStock = (productData.stock || 0) + 1;
+                        const { error: prodError } = await _supabase
+                            .from('productos')
+                            .update({ 
+                                stock: restoredStock,
+                                disponible: true // Nos aseguramos de marcarlo como disponible también
+                            })
+                            .eq('id', sale.product_id);
+                        
+                        if (prodError) console.error("Error al restaurar stock:", prodError.message);
+                    }
                 }
 
                 fetchSales();
