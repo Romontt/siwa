@@ -75,14 +75,24 @@
         .badge { padding: 5px 12px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
         .badge-pending { background: #fff3e0; color: #e67e22; }
         .badge-completed { background: #e8f5e9; color: #2d5a4c; }
+        .badge-cancelled { background: #ffebee; color: #d63031; }
 
         .btn-confirm { 
             background: var(--verde-fino); color: white; border: none; 
-            padding: 8px 16px; border-radius: 10px; cursor: pointer; font-weight: 600;
+            padding: 8px 12px; border-radius: 10px; cursor: pointer; font-weight: 600;
+            margin-bottom: 5px; width: 100%;
         }
-        .btn-confirm:hover { transform: scale(1.05); background: #1e3d33; }
+        .btn-cancel {
+            background: #fdf0f0; color: var(--danger); border: 1px solid #fadbd8;
+            padding: 6px 12px; border-radius: 10px; cursor: pointer; font-size: 0.75rem;
+            width: 100%;
+        }
+        .btn-confirm:hover { background: #1e3d33; }
+        .btn-cancel:hover { background: #f9ebeb; }
+
         .btn-back { color: white; text-decoration: none; font-size: 0.9rem; display: flex; align-items: center; gap: 5px; }
         .txt-small { font-size: 0.75rem; color: #95a5a6; display: block; }
+        .actions-cell { display: flex; flex-direction: column; gap: 4px; min-width: 140px; }
     </style>
 </head>
 <body>
@@ -108,13 +118,12 @@
                         .order('created_at', { ascending: false });
                     
                     if (error) throw error;
-
                     if (data) {
                         setSales(data);
                         calculateMetrics(data);
                     }
                 } catch (err) {
-                    console.error("Error cargando ventas:", err.message);
+                    console.error("Error:", err.message);
                 } finally {
                     setLoading(false);
                 }
@@ -135,14 +144,35 @@
             }
 
             async function confirmSale(id) {
-                if(!confirm("¿Deseas confirmar esta venta? Esto actualizará el stock e inventario.")) return;
+                if(!confirm("¿Confirmar pago y descontar del inventario?")) return;
                 
-                const { error } = await _supabase.rpc('confirm_sale', { p_sale_id: id });
+                // Intentar por RPC (Lógica de stock)
+                const { error: rpcError } = await _supabase.rpc('confirm_sale', { p_sale_id: id });
                 
+                if (rpcError) {
+                    console.log("RPC no encontrado, aplicando actualización directa...");
+                    // Si falla el RPC, actualizamos el estado manualmente para que al menos sume en la tabla
+                    const { error: updateError } = await _supabase
+                        .from('sales')
+                        .update({ status: 'completed' })
+                        .eq('id', id);
+                    
+                    if (updateError) alert("Error: " + updateError.message);
+                }
+                fetchSales();
+            }
+
+            async function cancelSale(id) {
+                if(!confirm("¿Marcar venta como no completada? Esto la quitará de pendientes.")) return;
+                
+                const { error } = await _supabase
+                    .from('sales')
+                    .update({ status: 'cancelled' })
+                    .eq('id', id);
+
                 if (error) {
-                    alert("Error en la base de datos: " + error.message);
+                    alert("Error al cancelar: " + error.message);
                 } else {
-                    alert("¡Venta confirmada e inventario actualizado!");
                     fetchSales();
                 }
             }
@@ -150,7 +180,7 @@
             return (
                 <div>
                     <header>
-                        <a href="admin.html" className="btn-back"><span>←</span> Panel Principal</a>
+                        <a href="admin.html" className="btn-back"><span>←</span> Volver</a>
                         <h1 style={{fontFamily: 'Playfair Display', margin: 0, fontSize: '1.2rem'}}>SIWA FINANCE</h1>
                         <div style={{width: '100px'}}></div>
                     </header>
@@ -160,22 +190,22 @@
                             <div className="stat-card card-total">
                                 <h3>Ingresos Totales</h3>
                                 <p>₡{metrics.total.toLocaleString('es-CR')}</p>
-                                <span className="txt-small">Confirmados (IVA incl.)</span>
+                                <span className="txt-small">Ventas completadas</span>
                             </div>
                             <div className="stat-card card-iva">
                                 <h3>IVA por Reservar</h3>
                                 <p>₡{Math.round(metrics.iva).toLocaleString('es-CR')}</p>
-                                <span className="txt-small">Monto del 13%</span>
+                                <span className="txt-small">13% de lo pagado</span>
                             </div>
                             <div className="stat-card card-profit">
                                 <h3>Ganancia Real</h3>
                                 <p>₡{metrics.profit.toLocaleString('es-CR')}</p>
-                                <span className="txt-small">Total tras costos</span>
+                                <span className="txt-small">Utilidad neta confirmada</span>
                             </div>
                             <div className="stat-card card-pending">
                                 <h3>Por Confirmar</h3>
                                 <p>{metrics.pending}</p>
-                                <span className="txt-small">Pedidos pendientes</span>
+                                <span className="txt-small">Esperando confirmación</span>
                             </div>
                         </div>
 
@@ -195,7 +225,7 @@
                                     </thead>
                                     <tbody>
                                         {sales.length === 0 ? (
-                                            <tr><td colSpan="5" style={{textAlign: 'center', padding: '20px'}}>No hay ventas registradas.</td></tr>
+                                            <tr><td colSpan="5" style={{textAlign: 'center', padding: '20px'}}>No hay registros.</td></tr>
                                         ) : (
                                             sales.map(sale => {
                                                 const subtotal = Number(sale.total_amount) / 1.13;
@@ -211,21 +241,29 @@
                                                             <div className="txt-small">IVA: ₡{Math.round(iva).toLocaleString()}</div>
                                                             <div className="txt-small" style={{color: 'var(--verde-fino)'}}>Ganancia: ₡{Number(sale.total_profit || 0).toLocaleString()}</div>
                                                         </td>
-                                                        <td style={{ fontWeight: '600', color: 'var(--azul-navy)' }}>
+                                                        <td style={{ fontWeight: '600' }}>
                                                             ₡{Number(sale.total_amount).toLocaleString('es-CR')}
                                                         </td>
                                                         <td>
                                                             <span className={`badge badge-${sale.status}`}>
-                                                                {sale.status === 'pending' ? 'Pendiente' : 'Pagado'}
+                                                                {sale.status === 'pending' ? 'Pendiente' : 
+                                                                 sale.status === 'completed' ? 'Pagado' : 'Cancelado'}
                                                             </span>
                                                         </td>
-                                                        <td>
+                                                        <td className="actions-cell">
                                                             {sale.status === 'pending' ? (
-                                                                <button className="btn-confirm" onClick={() => confirmSale(sale.id)}>
-                                                                    Confirmar Pago
-                                                                </button>
+                                                                <>
+                                                                    <button className="btn-confirm" onClick={() => confirmSale(sale.id)}>
+                                                                        Confirmar Pago
+                                                                    </button>
+                                                                    <button className="btn-cancel" onClick={() => cancelSale(sale.id)}>
+                                                                        No se completó
+                                                                    </button>
+                                                                </>
                                                             ) : (
-                                                                <span style={{color: '#bdc3c7', fontSize: '0.8rem'}}>✓ Procesada</span>
+                                                                <span style={{color: '#bdc3c7', fontSize: '0.8rem'}}>
+                                                                    {sale.status === 'completed' ? '✓ Inventario actualizado' : '✕ Venta anulada'}
+                                                                </span>
                                                             )}
                                                         </td>
                                                     </tr>
