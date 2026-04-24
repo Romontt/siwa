@@ -131,14 +131,8 @@
 
             function calculateMetrics(allSales) {
                 const completed = allSales.filter(s => s.status === 'completed');
-                
-                // 1. Ingresos Totales (Bruto)
                 const totalVentasBruto = completed.reduce((acc, s) => acc + Number(s.total_amount || 0), 0);
-                
-                // 2. Cálculo de IVA (13% incluido en el total)
                 const totalIVA = totalVentasBruto - (totalVentasBruto / 1.13); 
-                
-                // 3. Ganancia Real (Ingreso Bruto - IVA)
                 const gananciaRealTotal = totalVentasBruto - totalIVA;
                 
                 setMetrics({
@@ -178,18 +172,34 @@
                     }
                 }
 
-                await _supabase.rpc('confirm_sale', { p_sale_id: sale.id });
                 fetchSales();
             }
 
-            async function cancelSale(id) {
-                if(!confirm("¿Anular esta venta?")) return;
-                const { error } = await _supabase
+            async function cancelSale(sale) {
+                if(!confirm("¿Anular esta venta? La prenda volverá a estar disponible.")) return;
+                
+                // 1. Cambiamos estado de la venta
+                const { error: saleError } = await _supabase
                     .from('sales')
                     .update({ status: 'cancelled' })
-                    .eq('id', id);
-                if (error) alert(error.message);
-                else fetchSales();
+                    .eq('id', sale.id);
+
+                if (saleError) {
+                    alert(saleError.message);
+                    return;
+                }
+
+                // 2. Si hay un product_id, lo volvemos a poner como disponible
+                if (sale.product_id) {
+                    const { error: prodError } = await _supabase
+                        .from('productos')
+                        .update({ disponible: true })
+                        .eq('id', sale.product_id);
+                    
+                    if (prodError) console.error("Error activando producto:", prodError.message);
+                }
+
+                fetchSales();
             }
 
             return (
@@ -246,7 +256,6 @@
                                                 const monto = Number(sale.total_amount || 0);
                                                 const subtotal = monto / 1.13;
                                                 const iva = monto - subtotal;
-                                                // Ganancia de la fila individual (Precio sin IVA)
                                                 const gananciaFila = subtotal;
 
                                                 return (
@@ -277,7 +286,7 @@
                                                                     <button className="btn-confirm" onClick={() => confirmSale(sale)}>
                                                                         Confirmar Pago
                                                                     </button>
-                                                                    <button className="btn-cancel" onClick={() => cancelSale(sale.id)}>
+                                                                    <button className="btn-cancel" onClick={() => cancelSale(sale)}>
                                                                         No se completó
                                                                     </button>
                                                                 </>
