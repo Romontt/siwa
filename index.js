@@ -48,12 +48,10 @@ function App() {
     // --- EFECTO PARA MANEJAR BOTÓN ATRÁS (VISOR DE IMAGEN) ---
     useEffect(() => {
         if (selectedImage) {
-            // Cuando se abre la imagen, añadimos un estado al historial
             window.history.pushState({ modalOpen: true }, "");
         }
 
         const handlePopState = () => {
-            // Si el usuario da "atrás", cerramos la imagen
             setSelectedImage(null);
         };
 
@@ -125,9 +123,14 @@ function App() {
         if (cart.length === 0) return;
 
         try {
-            const { error } = await _supabase.from('ventas').insert([
+            // Se cambió la tabla de 'ventas' a 'sales' según tu base de datos
+            const { error } = await _supabase.from('sales').insert([
                 {
-                    productos: cart.map(item => ({ id: item.id, nombre: item.nombre, precio: item.tiene_descuento ? (item.precio_offer || item.precio_oferta) : item.precio })),
+                    productos: cart.map(item => ({ 
+                        id: item.id, 
+                        nombre: item.nombre, 
+                        precio: item.tiene_descuento ? (item.precio_offer || item.precio_oferta) : item.precio 
+                    })),
                     total: cartTotal,
                     estado: 'pendiente',
                     session_id: sessionId
@@ -398,7 +401,6 @@ function App() {
             {selectedImage && (
                 <div 
                     onClick={() => {
-                        // Al hacer clic fuera, volvemos atrás en el historial (esto disparará setSelectedImage(null))
                         window.history.back();
                     }}
                     style={{
