@@ -123,18 +123,23 @@ function App() {
     const enviarPedidoWhatsApp = async () => {
         if (cart.length === 0) return;
 
+        const mensajeBase = `¡Hola Siwá! 🌬️ Me interesa realizar el siguiente pedido:%0A%0A`;
+        const lista = cart.map(item => {
+            const precio = parseInt(item.tiene_descuento ? (item.precio_offer || item.precio_oferta) : item.precio);
+            return `- 1x ${item.nombre} (₡${precio.toLocaleString()})`;
+        }).join('%0A');
+
+        const totalTexto = `%0A%0A*Total: ₡${cartTotal.toLocaleString()}*%0A_Envío gratis en Guápiles Centro_`;
+        const fullLink = `https://wa.me/50683337497?text=${mensajeBase}${lista}${totalTexto}`;
+
         try {
-            // CORRECCIÓN: Nombres de columnas actualizados según tu imagen de tabla
+            // Inserción en tabla 'sales' con las columnas exactas proporcionadas
             const { error } = await _supabase.from('sales').insert([
                 {
-                    items: cart.map(item => ({ 
-                        id: item.id, 
-                        nombre: item.nombre, 
-                        precio: item.tiene_descuento ? (item.precio_offer || item.precio_oferta) : item.precio 
-                    })),
-                    total: cartTotal,
-                    status: 'pendiente',
-                    session_id: sessionId
+                    total_amount: cartTotal,
+                    status: 'pending',
+                    whatsapp_link: fullLink,
+                    customer_name: 'Cliente Web' // Campo requerido por la tabla
                 }
             ]);
 
@@ -146,15 +151,7 @@ function App() {
                 { currency: 'CRC', value: cartTotal, items: cart.map(i => ({ item_id: i.id, item_name: i.nombre })) }
             );
 
-            const mensajeBase = `¡Hola Siwá! 🌬️ Me interesa realizar el siguiente pedido:%0A%0A`;
-            const lista = cart.map(item => {
-                const precio = parseInt(item.tiene_descuento ? (item.precio_offer || item.precio_oferta) : item.precio);
-                return `- 1x ${item.nombre} (₡${precio.toLocaleString()})`;
-            }).join('%0A');
-
-            const totalTexto = `%0A%0A*Total: ₡${cartTotal.toLocaleString()}*%0A_Envío gratis en Guápiles Centro_`;
-            
-            window.open(`https://wa.me/50683337497?text=${mensajeBase}${lista}${totalTexto}`, '_blank');
+            window.open(fullLink, '_blank');
             setCart([]);
             setIsCartOpen(false);
 
