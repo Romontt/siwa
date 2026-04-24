@@ -206,7 +206,7 @@ function App() {
             }}>
                 <div className="logo-wrapper" style={{ flexShrink: 0 }}>
                     <img 
-                        src="/logo-full.webp" 
+                        src="/logo-full.png" 
                         alt="Siwá Logo" 
                         style={{ 
                             height: isMobile ? '45px' : '75px', 
