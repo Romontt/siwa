@@ -45,6 +45,22 @@ function App() {
         }
     };
 
+    // --- EFECTO PARA MANEJAR BOTÓN ATRÁS (VISOR DE IMAGEN) ---
+    useEffect(() => {
+        if (selectedImage) {
+            // Cuando se abre la imagen, añadimos un estado al historial
+            window.history.pushState({ modalOpen: true }, "");
+        }
+
+        const handlePopState = () => {
+            // Si el usuario da "atrás", cerramos la imagen
+            setSelectedImage(null);
+        };
+
+        window.addEventListener('popstate', handlePopState);
+        return () => window.removeEventListener('popstate', handlePopState);
+    }, [selectedImage]);
+
     useEffect(() => {
         const path = cat === 'Todos' ? '/' : `/${cat}`;
         trackEvent('page_views', 
@@ -76,7 +92,6 @@ function App() {
 
     const addToCart = (product) => {
         const isAlreadyInCart = cart.some(item => item.id === product.id);
-        // Solo permite agregar si hay stock y no está ya en el carrito
         if (!isAlreadyInCart && product.stock > 0) {
             setCart([...cart, { ...product, cartId: Date.now() + Math.random() }]);
             trackEvent('user_clicks', 
@@ -110,7 +125,6 @@ function App() {
         if (cart.length === 0) return;
 
         try {
-            // 1. Registrar la venta en Supabase
             const { error } = await _supabase.from('ventas').insert([
                 {
                     productos: cart.map(item => ({ id: item.id, nombre: item.nombre, precio: item.tiene_descuento ? (item.precio_offer || item.precio_oferta) : item.precio })),
@@ -122,14 +136,12 @@ function App() {
 
             if (error) throw error;
 
-            // 2. Tracking de Checkout
             trackEvent('user_clicks', 
                 { element_id: 'btn-confirm-whatsapp', click_text: 'Confirmar Pedido WhatsApp', page_path: window.location.pathname },
                 'begin_checkout',
                 { currency: 'CRC', value: cartTotal, items: cart.map(i => ({ item_id: i.id, item_name: i.nombre })) }
             );
 
-            // 3. Generar mensaje de WhatsApp
             const mensajeBase = `¡Hola Siwá! 🌬️ Me interesa realizar el siguiente pedido:%0A%0A`;
             const lista = cart.map(item => {
                 const precio = parseInt(item.tiene_descuento ? (item.precio_offer || item.precio_oferta) : item.precio);
@@ -138,7 +150,6 @@ function App() {
 
             const totalTexto = `%0A%0A*Total: ₡${cartTotal.toLocaleString()}*%0A_Envío gratis en Guápiles Centro_`;
             
-            // 4. Abrir WhatsApp y resetear
             window.open(`https://wa.me/50683337497?text=${mensajeBase}${lista}${totalTexto}`, '_blank');
             setCart([]);
             setIsCartOpen(false);
@@ -386,7 +397,10 @@ function App() {
             {/* MODAL VISOR DE IMAGEN */}
             {selectedImage && (
                 <div 
-                    onClick={() => setSelectedImage(null)}
+                    onClick={() => {
+                        // Al hacer clic fuera, volvemos atrás en el historial (esto disparará setSelectedImage(null))
+                        window.history.back();
+                    }}
                     style={{
                         position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
                         background: 'rgba(0,0,0,0.95)', zIndex: 3000, display: 'flex', 
@@ -395,7 +409,7 @@ function App() {
                     }}
                 >
                     <button 
-                        onClick={(e) => { e.stopPropagation(); setSelectedImage(null); }}
+                        onClick={(e) => { e.stopPropagation(); window.history.back(); }}
                         style={{ 
                             position: 'absolute', top: '25px', right: '25px', 
                             background: 'white', border: 'none', borderRadius: '50%', 
