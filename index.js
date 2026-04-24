@@ -1,11 +1,9 @@
 const { useState, useEffect } = React;
-
 // --- CONFIGURACIÓN FUERA DEL COMPONENTE (EVITA RE-CREACIÓN) ---
 const _supabase = supabase.createClient(
     'https://hvnpkljyoocqdzwdptgt.supabase.co',
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2bnBrbGp5b29jcWR6d2RwdGd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2MTAxMTQsImV4cCI6MjA5MjE4NjExNH0.-pq3iVzqJsJCyGNXkFPlHSIQeBTrr7i7ptsY6FYjJZ0'
 );
-
 const sessionId = (() => {
     let id = sessionStorage.getItem('siwa_session');
     if (!id) {
@@ -14,22 +12,17 @@ const sessionId = (() => {
     }
     return id;
 })();
-
 function App() {
     const [items, setItems] = useState([]);
     const [cat, setCat] = useState('Todos');
-    const [loading, setLoading] = useState(true);
-    
+    const [loading, setLoading] = useState(true);    
     // --- ESTADO DEL CARRITO ---
     const [cart, setCart] = useState([]);
     const [isCartOpen, setIsCartOpen] = useState(false);
-
     // --- ESTADO DE MODALES DE AYUDA ---
     const [helpModal, setHelpModal] = useState({ open: false, title: '', content: '' });
-
     // --- ESTADO PARA VISOR DE FOTOS ---
     const [selectedImage, setSelectedImage] = useState(null);
-
     const trackEvent = async (table, data, gaEventName = null, gaParams = {}) => {
         try {
             await _supabase.from(table).insert([{ ...data, session_id: sessionId }]);
@@ -45,7 +38,6 @@ function App() {
             console.error("Tracking error:", e);
         }
     };
-
     // --- FUNCION COMPARTIR ---
     const shareProduct = async (e, item) => {
         e.stopPropagation();
@@ -54,7 +46,6 @@ function App() {
             text: `Mira este tesoro de Siwá: ${item.nombre}`,
             url: window.location.href
         };
-
         try {
             if (navigator.share) {
                 await navigator.share(shareData);
@@ -67,21 +58,17 @@ function App() {
             console.log('Error sharing:', err);
         }
     };
-
     // --- EFECTO PARA MANEJAR BOTÓN ATRÁS (VISOR DE IMAGEN) ---
     useEffect(() => {
         if (selectedImage) {
             window.history.pushState({ modalOpen: true }, "");
         }
-
         const handlePopState = () => {
             setSelectedImage(null);
         };
-
         window.addEventListener('popstate', handlePopState);
         return () => window.removeEventListener('popstate', handlePopState);
     }, [selectedImage]);
-
     useEffect(() => {
         const path = cat === 'Todos' ? '/' : `/${cat}`;
         trackEvent('page_views', 
@@ -90,7 +77,6 @@ function App() {
             { page_title: `Categoría: ${cat}`, page_location: window.location.href }
         );
     }, [cat]);
-
     useEffect(() => {
         const loadData = async () => {
             setLoading(true);
@@ -110,7 +96,6 @@ function App() {
         };
         loadData();
     }, [cat]);
-
     const addToCart = (product) => {
         const isAlreadyInCart = cart.some(item => item.id === product.id);
         if (!isAlreadyInCart && product.stock > 0) {
@@ -126,7 +111,6 @@ function App() {
             );
         }
     };
-
     const removeFromCart = (cartId) => {
         const item = cart.find(i => i.cartId === cartId);
         setCart(cart.filter(item => item.cartId !== cartId));
@@ -136,15 +120,12 @@ function App() {
             { items: [{ item_id: item?.id, item_name: item?.nombre }] }
         );
     };
-
     const cartTotal = cart.reduce((acc, item) => {
         const precio = item.tiene_descuento ? (item.precio_offer || item.precio_oferta) : item.precio;
         return acc + parseInt(precio);
     }, 0);
-
     const enviarPedidoWhatsApp = async () => {
         if (cart.length === 0) return;
-
         const mensajeBase = `¡Hola Siwá! 🌬️ Me interesa realizar el siguiente pedido:%0A%0A`;
         const nombresProductos = cart.map(item => item.nombre).join(', ');
         const lista = cart.map(item => {
@@ -154,7 +135,6 @@ function App() {
 
         const totalTexto = `%0A%0A*Total: ₡${cartTotal.toLocaleString()}*%0A_Envío gratis en Guápiles Centro_`;
         const fullLink = `https://wa.me/50683337497?text=${mensajeBase}${lista}${totalTexto}`;
-
         try {
             const { error: errorSale } = await _supabase.from('sales').insert([
                 {
@@ -165,41 +145,32 @@ function App() {
                     product_name: nombresProductos
                 }
             ]);
-
             if (errorSale) throw errorSale;
-
             const idsParaActualizar = cart.map(item => item.id);
             const { error: errorUpdate } = await _supabase
                 .from('productos')
                 .update({ disponible: false })
                 .in('id', idsParaActualizar);
-
             if (errorUpdate) throw errorUpdate;
-
             trackEvent('user_clicks', 
                 { element_id: 'btn-confirm-whatsapp', click_text: 'Confirmar Pedido WhatsApp', page_path: window.location.pathname },
                 'begin_checkout',
                 { currency: 'CRC', value: cartTotal, items: cart.map(i => ({ item_id: i.id, item_name: i.nombre })) }
             );
-
             window.open(fullLink, '_blank');
             setCart([]);
-            setIsCartOpen(false);
-            
+            setIsCartOpen(false);            
             const { data: newData } = await _supabase.from('productos').select('*').eq('disponible', true);
             setItems(newData || []);
-
         } catch (err) {
             console.error("Error en el proceso de compra:", err);
             alert("Hubo un problema al procesar tu pedido. Por favor, intenta de nuevo.");
         }
     };
-
     const navTo = (nuevaCat) => {
         setCat(nuevaCat);
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
-
     const openHelp = (type) => {
         const info = {
             envios: { title: 'Políticas de Envío 🚚', content: 'Realizamos envíos a todo el país vía Correos de Costa Rica. En Guápiles Centro el envío es gratuito. Para el resto del país, el costo se calcula según la zona.' },
@@ -212,9 +183,7 @@ function App() {
         );
         setHelpModal({ open: true, ...info[type] });
     };
-
     const isMobile = window.innerWidth < 768;
-
     return (
         <div className={`app-container tema-${cat}`} style={{ boxSizing: 'border-box' }}>
             <nav className="nav-bar" style={{ 
@@ -236,8 +205,7 @@ function App() {
                             display: 'block'
                         }} 
                     />
-                </div>
-                
+                </div>                
                 <div className="nav-links" style={{ 
                     gap: isMobile ? '5px' : '15px',
                     display: 'flex',
@@ -259,8 +227,7 @@ function App() {
                         >
                             {c}
                         </button>
-                    ))}
-                    
+                    ))}                    
                     <button onClick={() => setIsCartOpen(!isCartOpen)} style={{
                         background: '#f8f8f8', border: 'none', padding: isMobile ? '8px' : '10px', borderRadius: '50%',
                         position: 'relative', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -290,7 +257,6 @@ function App() {
                     </button>
                 </div>
             </nav>
-
             <header className="hero-section">
                 <div className="hero-content">
                     <span className="hero-label">Colección 2026</span>
@@ -298,7 +264,6 @@ function App() {
                     <p>Prendas elegidas con amor para acompañar cada pequeño gran paso.</p>
                 </div>
             </header>
-
             <main className="main-content" style={{ padding: isMobile ? '15px 8px' : '40px 20px', paddingBottom: '100px' }}>
                 {loading ? (
                     <div className="loader">Cargando tesoros...</div>
@@ -313,8 +278,7 @@ function App() {
                         {items.map(item => {
                             const isAdded = cart.some(c => c.id === item.id);
                             const isOutOfStock = item.stock <= 0;
-                            const isBlocked = isOutOfStock || isAdded;
-                            
+                            const isBlocked = isOutOfStock || isAdded;                            
                             return (
                                 <article key={item.id} className="product-card" style={{ display: 'flex', flexDirection: 'column' }}>
                                     <div className="image-wrapper" 
@@ -344,7 +308,6 @@ function App() {
                                                 left: '10px', top: '10px'
                                             }}>-{item.porcentaje_descuento}%</span>
                                         )}
-                                        
                                         <button 
                                             onClick={(e) => shareProduct(e, item)}
                                             style={{
@@ -356,7 +319,6 @@ function App() {
                                         >
                                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
                                         </button>
-
                                         {item.stock === 1 && !isOutOfStock && (
                                             <span style={{
                                                 position: 'absolute', bottom: '10px', right: '10px',
@@ -372,7 +334,6 @@ function App() {
                                             style={{ width: '100%', height: '100%', objectFit: 'cover', filter: isOutOfStock ? 'grayscale(1)' : 'none' }}
                                         />
                                     </div>
-                                    
                                     <div className="product-info" style={{ 
                                         padding: '12px 2px', 
                                         display: 'flex', 
@@ -431,7 +392,6 @@ function App() {
                     </div>
                 )}
             </main>
-
             {/* MODAL VISOR DE IMAGEN */}
             {selectedImage && (
                 <div 
@@ -457,7 +417,6 @@ function App() {
                             color: '#333'
                         }}
                     >✕</button>
-                    
                     <div style={{ position: 'relative', width: '90%', height: '90%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         <img 
                             src={selectedImage} 
@@ -473,7 +432,6 @@ function App() {
                     </div>
                 </div>
             )}
-
             {/* CARRITO LATERAL */}
             {isCartOpen && (
                 <div style={{
@@ -485,7 +443,6 @@ function App() {
                         <h2 style={{ fontSize: '1.2rem', margin: 0 }}>Tu Carrito 🛒</h2>
                         <button onClick={() => setIsCartOpen(false)} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer' }}>✕</button>
                     </div>
-                    
                     <div style={{ flex: 1, overflowY: 'auto', padding: '20px' }}>
                         {cart.length === 0 ? (
                             <p style={{ textAlign: 'center', color: '#999', marginTop: '40px' }}>El carrito está vacío</p>
@@ -502,7 +459,6 @@ function App() {
                             ))
                         )}
                     </div>
-
                     {cart.length > 0 && (
                         <div style={{ padding: '20px', background: '#fcfcfc', borderTop: '1px solid #eee' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '1.1rem', marginBottom: '10px' }}>
@@ -522,7 +478,6 @@ function App() {
                     )}
                 </div>
             )}
-
             {/* MODAL DE AYUDA */}
             {helpModal.open && (
                 <div style={{
@@ -537,7 +492,6 @@ function App() {
                     </div>
                 </div>
             )}
-
             <section className="about-section">
                 <div className="about-container">
                     <div className="about-visual">
@@ -552,7 +506,6 @@ function App() {
                     </div>
                 </div>
             </section>
-
             <footer className="main-footer">
                 <div className="footer-top">
                     <div className="footer-column brand-col">
@@ -595,6 +548,5 @@ function App() {
         </div>
     );
 }
-
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(<App />);
