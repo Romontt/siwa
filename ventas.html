@@ -21,7 +21,6 @@
             --subtle: #f8f9fa;
         }
 
-        
         body { font-family: 'Outfit', sans-serif; background: var(--bg-claro); margin: 0; padding: 0; color: var(--texto); }
         
         header {
@@ -132,36 +131,61 @@
 
             function calculateMetrics(allSales) {
                 const completed = allSales.filter(s => s.status === 'completed');
+                
+                // Suma total cobrada
                 const totalVentas = completed.reduce((acc, s) => acc + Number(s.total_amount || 0), 0);
+                
+                // IVA 13%
                 const totalIVA = totalVentas - (totalVentas / 1.13); 
-                const gananciaBruta = completed.reduce((acc, s) => acc + Number(s.total_profit || 0), 0);
+                
+                // Suma de Ganancia Real (Columna total_profit)
+                const gananciaRealTotal = completed.reduce((acc, s) => acc + Number(s.total_profit || 0), 0);
                 
                 setMetrics({
                     total: totalVentas,
                     iva: totalIVA,
-                    profit: gananciaBruta,
+                    profit: gananciaRealTotal,
                     pending: allSales.filter(s => s.status === 'pending').length
                 });
             }
 
-            async function confirmSale(id) {
-                if(!confirm("¿Confirmar pago y actualizar inventario?")) return;
+            async function confirmSale(sale) {
+                if(!confirm("¿Confirmar pago y descontar 1 unidad del stock en productos?")) return;
                 
-                // Intentamos actualización directa primero para asegurar el cambio de estado
-                const { error } = await _supabase
+                // 1. Actualizar estado de la venta
+                const { error: updateError } = await _supabase
                     .from('sales')
                     .update({ status: 'completed' })
-                    .eq('id', id)
-                    .select(); // El select ayuda a confirmar que el cambio se hizo
+                    .eq('id', sale.id);
 
-                if (error) {
-                    alert("Error al actualizar: " + error.message);
-                    console.error(error);
-                } else {
-                    // Si tienes el RPC configurado para el stock, se dispara aquí
-                    await _supabase.rpc('confirm_sale', { p_sale_id: id });
-                    fetchSales();
+                if (updateError) {
+                    alert("Error al actualizar venta: " + updateError.message);
+                    return;
                 }
+
+                // 2. Descontar stock en la tabla 'productos'
+                // Buscamos el producto por su ID y restamos 1 al stock actual
+                if (sale.product_id) {
+                    // Primero obtenemos el stock actual para restarle
+                    const { data: productData } = await _supabase
+                        .from('productos')
+                        .select('stock')
+                        .eq('id', sale.product_id)
+                        .single();
+
+                    if (productData) {
+                        const newStock = Math.max(0, (productData.stock || 0) - 1);
+                        await _supabase
+                            .from('productos')
+                            .update({ stock: newStock })
+                            .eq('id', sale.product_id);
+                    }
+                }
+
+                // 3. Ejecutar RPC si existe para procesos adicionales de servidor
+                await _supabase.rpc('confirm_sale', { p_sale_id: sale.id });
+                
+                fetchSales();
             }
 
             async function cancelSale(id) {
@@ -170,8 +194,7 @@
                 const { error } = await _supabase
                     .from('sales')
                     .update({ status: 'cancelled' })
-                    .eq('id', id)
-                    .select();
+                    .eq('id', id);
 
                 if (error) {
                     alert("Error al cancelar: " + error.message);
@@ -203,7 +226,7 @@
                             <div className="stat-card card-profit">
                                 <h3>Ganancia Real</h3>
                                 <p>₡{metrics.profit.toLocaleString('es-CR')}</p>
-                                <span className="txt-small">Utilidad neta confirmada</span>
+                                <span className="txt-small">Suma de utilidades netas</span>
                             </div>
                             <div className="stat-card card-pending">
                                 <h3>Por Confirmar</h3>
@@ -256,7 +279,7 @@
                                                         <td className="actions-cell">
                                                             {sale.status === 'pending' ? (
                                                                 <>
-                                                                    <button className="btn-confirm" onClick={() => confirmSale(sale.id)}>
+                                                                    <button className="btn-confirm" onClick={() => confirmSale(sale)}>
                                                                         Confirmar Pago
                                                                     </button>
                                                                     <button className="btn-cancel" onClick={() => cancelSale(sale.id)}>
