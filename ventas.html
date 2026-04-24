@@ -150,14 +150,17 @@
                 const { error: rpcError } = await _supabase.rpc('confirm_sale', { p_sale_id: id });
                 
                 if (rpcError) {
-                    console.log("RPC no encontrado, aplicando actualización directa...");
-                    // Si falla el RPC, actualizamos el estado manualmente para que al menos sume en la tabla
+                    console.warn("RPC falló o no existe, intentando actualización directa...");
+                    // Respaldo: actualización directa si el RPC falla
                     const { error: updateError } = await _supabase
                         .from('sales')
                         .update({ status: 'completed' })
                         .eq('id', id);
                     
-                    if (updateError) alert("Error: " + updateError.message);
+                    if (updateError) {
+                        alert("Error de permisos o conexión: " + updateError.message);
+                        return;
+                    }
                 }
                 fetchSales();
             }
