@@ -134,20 +134,18 @@ function App() {
         const fullLink = `https://wa.me/50683337497?text=${mensajeBase}${lista}${totalTexto}`;
 
         try {
-            // 1. Inserción en tabla 'sales' con nombres de productos incluidos
             const { error: errorSale } = await _supabase.from('sales').insert([
                 {
                     total_amount: cartTotal,
                     status: 'pending',
                     whatsapp_link: fullLink,
                     customer_name: 'Cliente Web',
-                    product_name: nombresProductos // Se envía la lista de nombres
+                    product_name: nombresProductos
                 }
             ]);
 
             if (errorSale) throw errorSale;
 
-            // 2. Marcar productos como NO disponibles (Vendidos)
             const idsParaActualizar = cart.map(item => item.id);
             const { error: errorUpdate } = await _supabase
                 .from('productos')
@@ -166,7 +164,6 @@ function App() {
             setCart([]);
             setIsCartOpen(false);
             
-            // Refrescar lista de productos para ocultar el vendido
             const { data: newData } = await _supabase.from('productos').select('*').eq('disponible', true);
             setItems(newData || []);
 
@@ -208,25 +205,15 @@ function App() {
                 width: '100%'
             }}>
                 <div className="logo-wrapper" style={{ flexShrink: 0 }}>
-                    <div className="siwa-brand" style={{ 
-                        fontSize: isMobile ? '2rem' : '3.2rem', 
-                        lineHeight: '1',
-                        fontWeight: '900'
-                    }}>
-                        <span className="logo-symbol" style={{ fontWeight: '800' }}>@</span>
-                        <span className="logo-text">Siwá</span>
-                        <span className="logo-dot">.</span>
-                    </div>
-                    <small className="logo-tagline" style={{ 
-                        fontSize: isMobile ? '0.75rem' : '1.1rem',
-                        letterSpacing: isMobile ? '2px' : '4px',
-                        display: 'block',
-                        marginTop: '6px',
-                        fontWeight: '800',
-                        textTransform: 'uppercase'
-                    }}>
-                        TIENDA VIRTUAL INFANTIL
-                    </small>
+                    <img 
+                        src="/logo-full.webp" 
+                        alt="Siwá Logo" 
+                        style={{ 
+                            height: isMobile ? '45px' : '75px', 
+                            width: 'auto',
+                            display: 'block'
+                        }} 
+                    />
                 </div>
                 
                 <div className="nav-links" style={{ 
