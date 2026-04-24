@@ -132,17 +132,28 @@
             function calculateMetrics(allSales) {
                 const completed = allSales.filter(s => s.status === 'completed');
                 
-                // Suma total cobrada
-                const totalVentas = completed.reduce((acc, s) => acc + Number(s.total_amount || 0), 0);
+                // 1. Ingresos Totales (Bruto)
+                const totalVentasBruto = completed.reduce((acc, s) => acc + Number(s.total_amount || 0), 0);
                 
-                // IVA 13%
-                const totalIVA = totalVentas - (totalVentas / 1.13); 
+                // 2. Cálculo de IVA (13% incluido en el total)
+                // Fórmula: Total - (Total / 1.13)
+                const totalIVA = totalVentasBruto - (totalVentasBruto / 1.13); 
                 
-                // Suma de Ganancia Real (Columna total_profit)
-                const gananciaRealTotal = completed.reduce((acc, s) => acc + Number(s.total_profit || 0), 0);
+                // 3. Ganancia Real Neta
+                // Si la base de datos ya tiene 'total_profit' calculado restando el costo, 
+                // debemos asegurarnos que ese profit no incluya el IVA.
+                // Suponiendo que 'total_profit' es (Precio Venta - Costo), le restamos el IVA.
+                const gananciaRealTotal = completed.reduce((acc, s) => {
+                    const montoVenta = Number(s.total_amount || 0);
+                    const ivaDeEstaVenta = montoVenta - (montoVenta / 1.13);
+                    const utilidadBruta = Number(s.total_profit || 0); // Esto suele ser (Venta - Costo)
+                    
+                    // Ganancia Neta = Utilidad Bruta - IVA
+                    return acc + (utilidadBruta - ivaDeEstaVenta);
+                }, 0);
                 
                 setMetrics({
-                    total: totalVentas,
+                    total: totalVentasBruto,
                     iva: totalIVA,
                     profit: gananciaRealTotal,
                     pending: allSales.filter(s => s.status === 'pending').length
@@ -150,23 +161,19 @@
             }
 
             async function confirmSale(sale) {
-                if(!confirm("¿Confirmar pago y descontar 1 unidad del stock en productos?")) return;
+                if(!confirm("¿Confirmar pago y actualizar inventario?")) return;
                 
-                // 1. Actualizar estado de la venta
                 const { error: updateError } = await _supabase
                     .from('sales')
                     .update({ status: 'completed' })
                     .eq('id', sale.id);
 
                 if (updateError) {
-                    alert("Error al actualizar venta: " + updateError.message);
+                    alert("Error: " + updateError.message);
                     return;
                 }
 
-                // 2. Descontar stock en la tabla 'productos'
-                // Buscamos el producto por su ID y restamos 1 al stock actual
                 if (sale.product_id) {
-                    // Primero obtenemos el stock actual para restarle
                     const { data: productData } = await _supabase
                         .from('productos')
                         .select('stock')
@@ -182,25 +189,18 @@
                     }
                 }
 
-                // 3. Ejecutar RPC si existe para procesos adicionales de servidor
                 await _supabase.rpc('confirm_sale', { p_sale_id: sale.id });
-                
                 fetchSales();
             }
 
             async function cancelSale(id) {
-                if(!confirm("¿Marcar venta como no completada?")) return;
-                
+                if(!confirm("¿Anular esta venta?")) return;
                 const { error } = await _supabase
                     .from('sales')
                     .update({ status: 'cancelled' })
                     .eq('id', id);
-
-                if (error) {
-                    alert("Error al cancelar: " + error.message);
-                } else {
-                    fetchSales();
-                }
+                if (error) alert(error.message);
+                else fetchSales();
             }
 
             return (
@@ -214,24 +214,24 @@
                     <main className="container">
                         <div className="stats-grid">
                             <div className="stat-card card-total">
-                                <h3>Ingresos Totales</h3>
+                                <h3>Ingresos Brutos</h3>
                                 <p>₡{metrics.total.toLocaleString('es-CR')}</p>
-                                <span className="txt-small">Ventas completadas</span>
+                                <span className="txt-small">Total en caja (con IVA)</span>
                             </div>
                             <div className="stat-card card-iva">
-                                <h3>IVA por Reservar</h3>
+                                <h3>IVA (13%)</h3>
                                 <p>₡{Math.round(metrics.iva).toLocaleString('es-CR')}</p>
-                                <span className="txt-small">13% de lo pagado</span>
+                                <span className="txt-small">Impuesto a declarar</span>
                             </div>
                             <div className="stat-card card-profit">
                                 <h3>Ganancia Real</h3>
-                                <p>₡{metrics.profit.toLocaleString('es-CR')}</p>
-                                <span className="txt-small">Suma de utilidades netas</span>
+                                <p>₡{Math.round(metrics.profit).toLocaleString('es-CR')}</p>
+                                <span className="txt-small">Utilidad (Sin IVA y sin Costos)</span>
                             </div>
                             <div className="stat-card card-pending">
                                 <h3>Por Confirmar</h3>
                                 <p>{metrics.pending}</p>
-                                <span className="txt-small">Esperando confirmación</span>
+                                <span className="txt-small">Órdenes pendientes</span>
                             </div>
                         </div>
 
@@ -254,8 +254,11 @@
                                             <tr><td colSpan="5" style={{textAlign: 'center', padding: '20px'}}>No hay registros.</td></tr>
                                         ) : (
                                             sales.map(sale => {
-                                                const subtotal = Number(sale.total_amount) / 1.13;
-                                                const iva = Number(sale.total_amount) - subtotal;
+                                                const monto = Number(sale.total_amount || 0);
+                                                const subtotal = monto / 1.13;
+                                                const iva = monto - subtotal;
+                                                const gananciaLimpia = Number(sale.total_profit || 0) - iva;
+
                                                 return (
                                                     <tr key={sale.id}>
                                                         <td>
@@ -265,10 +268,12 @@
                                                         <td>
                                                             <div className="txt-small">Base: ₡{Math.round(subtotal).toLocaleString()}</div>
                                                             <div className="txt-small">IVA: ₡{Math.round(iva).toLocaleString()}</div>
-                                                            <div className="txt-small" style={{color: 'var(--verde-fino)'}}>Ganancia: ₡{Number(sale.total_profit || 0).toLocaleString()}</div>
+                                                            <div className="txt-small" style={{color: 'var(--verde-fino)', fontWeight: '600'}}>
+                                                                Utilidad: ₡{Math.round(gananciaLimpia).toLocaleString()}
+                                                            </div>
                                                         </td>
                                                         <td style={{ fontWeight: '600' }}>
-                                                            ₡{Number(sale.total_amount).toLocaleString('es-CR')}
+                                                            ₡{monto.toLocaleString('es-CR')}
                                                         </td>
                                                         <td>
                                                             <span className={`badge badge-${sale.status}`}>
@@ -288,7 +293,7 @@
                                                                 </>
                                                             ) : (
                                                                 <span style={{color: '#bdc3c7', fontSize: '0.8rem'}}>
-                                                                    {sale.status === 'completed' ? '✓ Inventario actualizado' : '✕ Venta anulada'}
+                                                                    {sale.status === 'completed' ? '✓ Procesado' : '✕ Anulado'}
                                                                 </span>
                                                             )}
                                                         </td>
